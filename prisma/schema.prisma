@@ -31,7 +31,10 @@ model User {
   createdAt         DateTime          @default(now()) @map("created_at")
   updatedAt         DateTime          @updatedAt @map("updated_at")
 
-  routes Route[]
+  routes    Route[]
+  comments  Comment[]
+  likes     Like[]
+  favorites Favorite[]
 
   @@unique([email], map: "users_email_unique")
   @@index([createdAt], map: "users_created_at_idx")
@@ -72,6 +75,9 @@ model Route {
   stops     RouteStop[]
   photos    RoutePhoto[]
   routeTags RouteTag[]
+  comments  Comment[]
+  likes     Like[]
+  favorites Favorite[]
 
   @@unique([userId, slug], map: "routes_user_slug_unique")
   @@index([userId], map: "routes_user_id_idx")
@@ -136,4 +142,50 @@ model RouteTag {
   @@id([routeId, tagId])
   @@index([tagId], map: "route_tags_tag_id_idx")
   @@map("route_tags")
+}
+
+model Comment {
+  id        BigInt   @id @default(autoincrement())
+  routeId   BigInt   @map("route_id")
+  userId    BigInt   @map("user_id")
+  body      String   @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  route Route @relation(fields: [routeId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+
+  @@index([routeId], map: "comments_route_id_idx")
+  @@index([userId], map: "comments_user_id_idx")
+  @@index([routeId, createdAt], map: "comments_route_created_at_idx")
+  @@index([userId, createdAt], map: "comments_user_created_at_idx")
+  @@map("comments")
+}
+
+model Like {
+  userId    BigInt   @map("user_id")
+  routeId   BigInt   @map("route_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  route Route @relation(fields: [routeId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+
+  @@id([userId, routeId])
+  @@index([routeId], map: "likes_route_id_idx")
+  @@index([createdAt], map: "likes_created_at_idx")
+  @@map("likes")
+}
+
+model Favorite {
+  userId    BigInt   @map("user_id")
+  routeId   BigInt   @map("route_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  route Route @relation(fields: [routeId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+
+  @@id([userId, routeId])
+  @@index([routeId], map: "favorites_route_id_idx")
+  @@index([createdAt], map: "favorites_created_at_idx")
+  @@map("favorites")
 }
