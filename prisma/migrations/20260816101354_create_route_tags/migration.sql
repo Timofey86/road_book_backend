@@ -1,6 +1,6 @@
 -- CreateTable
 CREATE TABLE `route_tags` (
-    `route_id` BIGINT NOT NULL,
+    `route_id` INTEGER NOT NULL,
     `tag_id` INTEGER NOT NULL,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 

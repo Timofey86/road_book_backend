@@ -1,7 +1,7 @@
 -- CreateTable
 CREATE TABLE `route_photos` (
-    `id` BIGINT NOT NULL AUTO_INCREMENT,
-    `route_id` BIGINT NOT NULL,
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `route_id` INTEGER NOT NULL,
     `object_key` VARCHAR(500) NOT NULL,
     `caption` VARCHAR(500) NULL,
     `position` SMALLINT NOT NULL,

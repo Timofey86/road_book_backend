@@ -1,7 +1,7 @@
 -- CreateTable
 CREATE TABLE `route_stops` (
-    `id` BIGINT NOT NULL AUTO_INCREMENT,
-    `route_id` BIGINT NOT NULL,
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `route_id` INTEGER NOT NULL,
     `name` VARCHAR(200) NOT NULL,
     `address` VARCHAR(500) NULL,
     `city_name` VARCHAR(150) NULL,

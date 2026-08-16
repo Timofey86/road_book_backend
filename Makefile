@@ -13,7 +13,7 @@ PROD_COMPOSE := docker compose -f $(DIR)/docker-compose.yml
 
 .PHONY: local-up local-down local-restart local-logs local-ps local-reset \
         app-shell prisma-generate prisma-studio migrate-dev migrate-deploy \
-        prod-up prod-down prod-restart prod-logs prod-ps local-config
+        prod-up prod-down prod-restart prod-logs prod-ps local-config app-shell-root
 
 local-up:
 	$(LOCAL_COMPOSE) up -d --build
@@ -40,8 +40,11 @@ local-config:
 app-shell:
 	$(LOCAL_COMPOSE) exec app sh
 
+app-shell-root:
+	$(LOCAL_COMPOSE) exec -u root app sh
+
 prisma-generate:
-	$(LOCAL_COMPOSE) exec app npm prisma:generate
+	$(LOCAL_COMPOSE) exec app npm run prisma:generate
 
 prisma-studio:
 	$(LOCAL_COMPOSE) exec app npx prisma studio --hostname 0.0.0.0 --port $(PRISMA_STUDIO_PORT)

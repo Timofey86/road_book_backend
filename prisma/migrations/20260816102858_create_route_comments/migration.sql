@@ -1,8 +1,8 @@
 -- CreateTable
 CREATE TABLE `comments` (
-    `id` BIGINT NOT NULL AUTO_INCREMENT,
-    `route_id` BIGINT NOT NULL,
-    `user_id` BIGINT NOT NULL,
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `route_id` INTEGER NOT NULL,
+    `user_id` INTEGER NOT NULL,
     `body` TEXT NOT NULL,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL,

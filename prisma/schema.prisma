@@ -4,8 +4,9 @@
 // Get a free hosted Postgres database in seconds: `npx create-db`
 
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
 }
 
 datasource db {
@@ -20,7 +21,7 @@ enum PreferredLanguage {
 }
 
 model User {
-  id           BigInt  @id @default(autoincrement())
+  id           Int     @id @default(autoincrement())
   name         String  @db.VarChar(100)
   email        String  @db.VarChar(255)
   passwordHash String  @map("password_hash") @db.VarChar(255)
@@ -55,8 +56,8 @@ model Tag {
 }
 
 model Route {
-  id     BigInt @id @default(autoincrement())
-  userId BigInt @map("user_id")
+  id     Int @id @default(autoincrement())
+  userId Int @map("user_id")
 
   title                String  @db.VarChar(150)
   slug                 String  @db.VarChar(180)
@@ -88,8 +89,8 @@ model Route {
 }
 
 model RouteStop {
-  id      BigInt @id @default(autoincrement())
-  routeId BigInt @map("route_id")
+  id      Int @id @default(autoincrement())
+  routeId Int @map("route_id")
 
   name        String  @db.VarChar(200)
   address     String? @db.VarChar(500)
@@ -115,8 +116,8 @@ model RouteStop {
 }
 
 model RoutePhoto {
-  id        BigInt   @id @default(autoincrement())
-  routeId   BigInt   @map("route_id")
+  id        Int      @id @default(autoincrement())
+  routeId   Int      @map("route_id")
   objectKey String   @map("object_key") @db.VarChar(500)
   caption   String?  @db.VarChar(500)
   position  Int      @db.SmallInt
@@ -132,7 +133,7 @@ model RoutePhoto {
 }
 
 model RouteTag {
-  routeId   BigInt   @map("route_id")
+  routeId   Int      @map("route_id")
   tagId     Int      @map("tag_id")
   createdAt DateTime @default(now()) @map("created_at")
 
@@ -145,9 +146,9 @@ model RouteTag {
 }
 
 model Comment {
-  id        BigInt   @id @default(autoincrement())
-  routeId   BigInt   @map("route_id")
-  userId    BigInt   @map("user_id")
+  id        Int      @id @default(autoincrement())
+  routeId   Int      @map("route_id")
+  userId    Int      @map("user_id")
   body      String   @db.Text
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -163,8 +164,8 @@ model Comment {
 }
 
 model Like {
-  userId    BigInt   @map("user_id")
-  routeId   BigInt   @map("route_id")
+  userId    Int      @map("user_id")
+  routeId   Int      @map("route_id")
   createdAt DateTime @default(now()) @map("created_at")
 
   user  User  @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
@@ -177,8 +178,8 @@ model Like {
 }
 
 model Favorite {
-  userId    BigInt   @map("user_id")
-  routeId   BigInt   @map("route_id")
+  userId    Int      @map("user_id")
+  routeId   Int      @map("route_id")
   createdAt DateTime @default(now()) @map("created_at")
 
   user  User  @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)

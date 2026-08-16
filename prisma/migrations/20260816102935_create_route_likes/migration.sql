@@ -1,7 +1,7 @@
 -- CreateTable
 CREATE TABLE `likes` (
-    `user_id` BIGINT NOT NULL,
-    `route_id` BIGINT NOT NULL,
+    `user_id` INTEGER NOT NULL,
+    `route_id` INTEGER NOT NULL,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
     INDEX `likes_route_id_idx`(`route_id`),
