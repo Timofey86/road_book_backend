@@ -1,0 +1,51 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: ${PROJECT_NAME}_app
+    env_file:
+      - .env
+    ports:
+      - "${APP_EXTERNAL_PORT}:${APP_PORT}"
+    depends_on:
+      - mysql
+      - redis
+    restart: unless-stopped
+    networks:
+      - road_book
+
+  mysql:
+    image: mysql:8.4
+    container_name: ${PROJECT_NAME}_mysql
+    command: --port=${MYSQL_PORT}
+    env_file:
+      - .env
+    volumes:
+      - mysql_data:/var/lib/mysql
+    restart: unless-stopped
+    networks:
+      - road_book
+
+  redis:
+    image: redis:alpine
+    container_name: ${PROJECT_NAME}_redis
+    command: >
+      redis-server
+      --port ${REDIS_PORT}
+      --appendonly yes
+      --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    networks:
+      - road_book
+
+volumes:
+  mysql_data:
+  redis_data:
+
+networks:
+  road_book:
+    driver: bridge

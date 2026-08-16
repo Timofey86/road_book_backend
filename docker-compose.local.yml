@@ -1,0 +1,86 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: ${PROJECT_NAME}_app_local
+    env_file:
+      - .env
+      - .env.local
+    command: >
+      sh -c "npm run prisma:generate &&
+               npm run start:dev"
+    volumes:
+      - .:/app
+      - app_node_modules:/app/node_modules
+    ports:
+      - "${APP_EXTERNAL_PORT}:${APP_PORT}"
+      - "${PRISMA_STUDIO_EXTERNAL_PORT}:${PRISMA_STUDIO_PORT}"
+    depends_on:
+      - mysql
+      - redis
+      - minio
+    restart: unless-stopped
+    networks:
+      - road_book
+
+  mysql:
+    image: mysql:8.4
+    container_name: ${PROJECT_NAME}_mysql_local
+    command: --port=${MYSQL_PORT}
+    env_file:
+      - .env
+      - .env.local
+    ports:
+      - "${MYSQL_EXTERNAL_PORT}:${MYSQL_PORT}"
+    volumes:
+      - mysql_local_data:/var/lib/mysql
+    restart: unless-stopped
+    networks:
+      - road_book
+
+  redis:
+    image: redis:alpine
+    container_name: ${PROJECT_NAME}_redis_local
+    command: >
+      redis-server
+      --port ${REDIS_PORT}
+      --appendonly yes
+      --requirepass ${REDIS_PASSWORD}
+    ports:
+      - "${REDIS_EXTERNAL_PORT}:${REDIS_PORT}"
+    volumes:
+      - redis_local_data:/data
+    restart: unless-stopped
+    networks:
+      - road_book
+
+  minio:
+    image: minio/minio
+    container_name: ${PROJECT_NAME}_minio_local
+    command: >
+      server /data
+      --address :${MINIO_PORT}
+      --console-address :${MINIO_CONSOLE_PORT}
+    env_file:
+      - .env
+      - .env.local
+    ports:
+      - "${MINIO_EXTERNAL_PORT}:${MINIO_PORT}"
+      - "${MINIO_CONSOLE_EXTERNAL_PORT}:${MINIO_CONSOLE_PORT}"
+    volumes:
+      - minio_local_data:/data
+    restart: unless-stopped
+    networks:
+      - road_book
+
+volumes:
+  app_node_modules:
+  mysql_local_data:
+  redis_local_data:
+  minio_local_data:
+
+networks:
+  road_book:
+    driver: bridge
