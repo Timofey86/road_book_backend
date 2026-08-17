@@ -13,10 +13,14 @@ PROD_COMPOSE := docker compose -f $(DIR)/docker-compose.yml
 
 .PHONY: local-up local-down local-restart local-logs local-ps local-reset \
         app-shell prisma-generate prisma-studio migrate-dev migrate-deploy \
-        prod-up prod-down prod-restart prod-logs prod-ps local-config app-shell-root
+        prod-up prod-down prod-restart prod-logs prod-ps local-config app-shell-root \
+        local-build
 
-local-up:
+
+local-build:
 	$(LOCAL_COMPOSE) up -d --build
+local-up:
+	$(LOCAL_COMPOSE) up -d
 
 local-down:
 	$(LOCAL_COMPOSE) down
