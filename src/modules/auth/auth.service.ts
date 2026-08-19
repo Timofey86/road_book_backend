@@ -29,16 +29,7 @@ export class AuthService {
                 bio: dto.bio,
             });
 
-            return {
-                id: user.id,
-                name: user.name,
-                email: user.email,
-                bio: user.bio,
-                avatarObjectKey: user.avatarObjectKey,
-                preferredLanguage: user.preferredLanguage,
-                createdAt: user.createdAt,
-                updatedAt: user.updatedAt,
-            };
+            return this.usersService.toResponseDto(user);
         } catch (error) {
             if (
                 error instanceof Prisma.PrismaClientKnownRequestError &&

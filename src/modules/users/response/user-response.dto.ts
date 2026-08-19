@@ -20,6 +20,12 @@ export class UserResponseDto {
     })
     avatarObjectKey: string | null;
 
+    @ApiPropertyOptional({
+        example: "http://localhost:9000/road-book-local/avatars/5/....png?X-Amz-...",
+        nullable: true,
+    })
+    avatarUrl: string | null;
+
     @ApiProperty({
         enum: PreferredLanguage,
         example: PreferredLanguage.en,
