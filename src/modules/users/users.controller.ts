@@ -1,7 +1,7 @@
 import {
     Body,
     Controller, Delete, FileTypeValidator,
-    Get,
+    Get, HttpCode, HttpStatus,
     MaxFileSizeValidator, ParseFilePipe,
     Patch,
     Post,
@@ -22,7 +22,7 @@ import {
     ApiConsumes,
     ApiCreatedResponse,
     ApiOkResponse,
-    ApiOperation,
+    ApiOperation, ApiResponse,
     ApiTags, ApiUnauthorizedResponse
 } from "@nestjs/swagger";
 
@@ -124,4 +124,14 @@ export class UsersController {
         return this.usersService.deleteAvatar(user.id);
     }
 
+    @UseGuards(JwtAuthGuard)
+    @Delete('me')
+    @HttpCode(HttpStatus.NO_CONTENT)
+    @ApiResponse({
+        status: HttpStatus.NO_CONTENT,
+        description: 'User deleted successfully',
+    })
+    deleteUser(@CurrentUser() user: JwtUser): Promise<void> {
+        return this.usersService.deleteUser(user.id);
+    }
 }

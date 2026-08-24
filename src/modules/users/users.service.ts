@@ -11,7 +11,8 @@ export class UsersService {
     constructor(
         private readonly prismaService: PrismaService,
         private readonly storageService: StorageService,
-    ) {}
+    ) {
+    }
 
     async toResponseDto(
         user: {
@@ -45,7 +46,7 @@ export class UsersService {
 
     findByEmail(email: string) {
         return this.prismaService.user.findUnique({
-            where: { email },
+            where: {email},
         });
     }
 
@@ -65,7 +66,7 @@ export class UsersService {
 
     async findById(id: number): Promise<UserResponseDto | null> {
         const user = await this.prismaService.user.findUnique({
-            where: { id },
+            where: {id},
             omit: {
                 passwordHash: true,
             },
@@ -81,7 +82,7 @@ export class UsersService {
     async update(id: number, dto: UpdateUserDto): Promise<UserResponseDto> {
         try {
             const user = await this.prismaService.user.update({
-                where: { id },
+                where: {id},
                 data: dto,
                 omit: {
                     passwordHash: true,
@@ -125,7 +126,7 @@ export class UsersService {
         const objectionKey = `avatars/${userId}/${randomUUID()}${extension}`;
 
         const user = await this.prismaService.user.findUnique({
-            where: { id: userId },
+            where: {id: userId},
             select: {
                 avatarObjectKey: true
             }
@@ -143,7 +144,7 @@ export class UsersService {
 
         try {
             const updatedUser = await this.prismaService.user.update({
-                where:{id: userId},
+                where: {id: userId},
                 data: {
                     avatarObjectKey: objectionKey
                 },
@@ -163,9 +164,9 @@ export class UsersService {
         }
     }
 
-    async deleteAvatar(userId: number):Promise<UserResponseDto> {
+    async deleteAvatar(userId: number): Promise<UserResponseDto> {
         const user = await this.prismaService.user.findUnique({
-            where: { id: userId },
+            where: {id: userId},
             omit: {
                 passwordHash: true,
             }
@@ -180,7 +181,7 @@ export class UsersService {
         }
 
         const updatedUser = await this.prismaService.user.update({
-            where: { id: userId },
+            where: {id: userId},
             data: {
                 avatarObjectKey: null
             },
@@ -190,5 +191,25 @@ export class UsersService {
         })
 
         return this.toResponseDto(updatedUser)
+    }
+
+    async deleteUser(userId: number) {
+        const user = await this.prismaService.user.findUnique({
+            where: { id: userId },
+            select: {
+                id: true,
+                avatarObjectKey: true,
+            },
+        });
+
+        if (!user) {
+            throw new NotFoundException('User not found')
+        }
+
+        await this.prismaService.user.delete({where: {id: userId}})
+
+        if (user.avatarObjectKey) {
+            await this.storageService.delete(user.avatarObjectKey)
+        }
     }
 }
