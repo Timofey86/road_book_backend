@@ -61,4 +61,10 @@ export class RouteCreatedResponseDto {
 
     @ApiProperty({example: '2026-08-16T12:00:00.000Z'})
     updatedAt: Date;
+
+    @ApiProperty({
+        example: [],
+        type: [Object],
+    })
+    stops: object[];
 }
