@@ -36,14 +36,6 @@ export class UsersService {
         };
     }
 
-    findAll() {
-        return this.prismaService.user.findMany({
-            omit: {
-                passwordHash: true,
-            },
-        });
-    }
-
     findByEmail(email: string) {
         return this.prismaService.user.findUnique({
             where: {email},

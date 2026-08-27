@@ -34,6 +34,8 @@ import {
 export class UsersController {
     constructor(private readonly usersService: UsersService){}
 
+
+    @Get('me')
     @UseGuards(JwtAuthGuard)
     @ApiOperation({
         summary: 'Get current user profile',
@@ -43,13 +45,12 @@ export class UsersController {
         description: 'Current user profile',
         type: UserResponseDto,
     })
-    @Get('me')
     getMe(@CurrentUser() user: JwtUser):Promise<UserResponseDto | null> {
         return this.usersService.findById(user.id);
     }
 
-    @UseGuards(JwtAuthGuard)
     @Patch('me')
+    @UseGuards(JwtAuthGuard)
     @ApiOkResponse({
         description: 'User profile successfully updated',
         type: UserResponseDto,
@@ -63,8 +64,8 @@ export class UsersController {
         return this.usersService.update(user.id, dto);
     }
 
-    @UseGuards(JwtAuthGuard)
     @Post('me/avatar')
+    @UseGuards(JwtAuthGuard)
     @ApiOperation({
         summary: 'Upload user avatar',
         description:
@@ -108,8 +109,8 @@ export class UsersController {
         return this.usersService.uploadAvatar(user.id, file);
     }
 
-    @UseGuards(JwtAuthGuard)
     @Delete('me/avatar')
+    @UseGuards(JwtAuthGuard)
     @ApiOkResponse({
         description: 'Avatar successfully deleted',
         type: UserResponseDto,
@@ -123,8 +124,8 @@ export class UsersController {
         return this.usersService.deleteAvatar(user.id);
     }
 
-    @UseGuards(JwtAuthGuard)
     @Delete('me')
+    @UseGuards(JwtAuthGuard)
     @HttpCode(HttpStatus.NO_CONTENT)
     @ApiResponse({
         status: HttpStatus.NO_CONTENT,

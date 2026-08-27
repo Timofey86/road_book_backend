@@ -29,3 +29,22 @@ export type RouteDetailsEntity = Prisma.RouteGetPayload<{
         };
     };
 }>;
+
+export type RouteListEntity = Prisma.RouteGetPayload<{
+    include: {
+        user: {
+            select: {
+                id: true;
+                name: true;
+                avatarObjectKey: true;
+            };
+        };
+        _count: {
+            select: {
+                stops: true;
+                likes: true;
+                comments: true;
+            };
+        };
+    };
+}>;
