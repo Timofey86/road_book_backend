@@ -17,9 +17,8 @@ import {UpdateUserDto} from "./dto/update-user.dto";
 import {UserResponseDto} from "./response/user-response.dto";
 import {FileInterceptor} from "@nestjs/platform-express";
 import {
-    ApiBearerAuth,
     ApiBody,
-    ApiConsumes,
+    ApiConsumes, ApiCookieAuth,
     ApiCreatedResponse,
     ApiOkResponse,
     ApiOperation, ApiResponse,
@@ -27,7 +26,7 @@ import {
 } from "@nestjs/swagger";
 
 @ApiTags('Users')
-@ApiBearerAuth()
+@ApiCookieAuth('access_token')
 @ApiUnauthorizedResponse({
     description: 'Unauthorized',
 })
