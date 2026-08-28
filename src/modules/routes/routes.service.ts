@@ -9,6 +9,8 @@ import {RouteDetailsEntity, RouteListEntity} from "./types/route-prisma.types";
 import {UpdateRouteDto} from "./dto/update-route.dto";
 import {RoutesPaginatedResponseDto} from "./response/routes-paginated-response.dto";
 import {RouteListItemResponseDto} from "./response/route-list-item-response.dto";
+import {RouteSortBy, RoutesQueryDto} from "./dto/routes-query.dto";
+import {Prisma} from "../../generated/prisma/client";
 
 @Injectable()
 export class RoutesService {
@@ -62,7 +64,8 @@ export class RoutesService {
         return slug;
     }
 
-    async findOne(routeId: number, currentUserId: number): Promise<RouteDetailsResponseDto> {
+    async findOne(routeId: number, currentUserId?: number): Promise<RouteDetailsResponseDto> {
+        const userId = currentUserId ?? -1;
         const route = await this.prismaService.route.findUnique({
             where: {
                 id: routeId,
@@ -95,7 +98,7 @@ export class RoutesService {
 
                 favorites: {
                     where: {
-                        userId: currentUserId,
+                        userId: userId,
                     },
                     select: {
                         userId: true,
@@ -368,6 +371,138 @@ export class RoutesService {
             likesCount: route._count.likes,
             commentsCount: route._count.comments,
             createdAt: route.createdAt,
+        };
+    }
+
+    async findAll(
+        query: RoutesQueryDto,
+    ): Promise<RoutesPaginatedResponseDto> {
+        const {
+            page,
+            limit,
+            search,
+            sortBy,
+            sortOrder,
+            minDistance,
+            maxDistance,
+        } = query;
+
+        const skip = (page - 1) * limit;
+
+        const normalizedSearch = search?.trim();
+
+        const where: Prisma.RouteWhereInput = {
+            ...(normalizedSearch && {
+                OR: [
+                    {
+                        title: {
+                            contains: normalizedSearch,
+                        },
+                    },
+                    {
+                        user: {
+                            name: {
+                                contains: normalizedSearch,
+                            },
+                        },
+                    },
+                ],
+            }),
+
+            ...(minDistance !== undefined || maxDistance !== undefined
+                ? {
+                    totalDistanceMeters: {
+                        ...(minDistance !== undefined && {
+                            gte: minDistance,
+                        }),
+                        ...(maxDistance !== undefined && {
+                            lte: maxDistance,
+                        }),
+                    },
+                }
+                : {}),
+        };
+
+        let orderBy: Prisma.RouteOrderByWithRelationInput[];
+
+        switch (sortBy) {
+            case RouteSortBy.LIKES:
+                orderBy = [
+                    {
+                        likes: {
+                            _count: sortOrder,
+                        },
+                    },
+                    {
+                        createdAt: 'desc',
+                    },
+                ];
+                break;
+
+            case RouteSortBy.DISTANCE:
+                orderBy = [
+                    {
+                        totalDistanceMeters: sortOrder,
+                    },
+                    {
+                        createdAt: 'desc',
+                    },
+                ];
+                break;
+
+            case RouteSortBy.CREATED_AT:
+            default:
+                orderBy = [
+                    {
+                        createdAt: sortOrder,
+                    },
+                ];
+                break;
+        }
+
+        const [routes, totalItems] = await Promise.all([
+            this.prismaService.route.findMany({
+                where,
+                skip,
+                take: limit,
+                orderBy,
+                include: {
+                    user: {
+                        select: {
+                            id: true,
+                            name: true,
+                            avatarObjectKey: true,
+                        },
+                    },
+                    _count: {
+                        select: {
+                            stops: true,
+                            likes: true,
+                            comments: true,
+                        },
+                    },
+                },
+            }),
+
+            this.prismaService.route.count({
+                where,
+            }),
+        ]);
+
+        const items = await Promise.all(
+            routes.map(route =>
+                this.mapRouteListItemResponse(route),
+            ),
+        );
+
+        return {
+            items,
+            meta: {
+                page,
+                limit,
+                totalItems,
+                totalPages: Math.ceil(totalItems / limit),
+            },
         };
     }
 }

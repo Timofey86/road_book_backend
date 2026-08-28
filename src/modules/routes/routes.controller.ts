@@ -29,16 +29,18 @@ import {RouteDetailsResponseDto} from "./response/route-details-response.dto";
 import {UpdateRouteDto} from "./dto/update-route.dto";
 import {RoutesPaginatedResponseDto} from "./response/routes-paginated-response.dto";
 import {PaginationQueryDto} from "../../common/pagination/dto/pageination-query.dto";
+import {RoutesQueryDto} from "./dto/routes-query.dto";
+import {OptionalJwtAuthGuard} from "../auth/jwt-optional-auth.guard";
 
 @Controller('routes')
 @ApiTags('Routes')
-@UseGuards(JwtAuthGuard)
 @ApiCookieAuth('access_token')
 export class RoutesController {
     constructor(private readonly routesService: RoutesService) {
     }
 
     @Post()
+    @UseGuards(JwtAuthGuard)
     @ApiCreatedResponse({
         description: 'Route successfully created',
         type: RouteCreatedResponseDto,
@@ -51,6 +53,7 @@ export class RoutesController {
     }
 
     @Get('my')
+    @UseGuards(JwtAuthGuard)
     @ApiOkResponse({
         description: 'Routes successfully received',
         type: RoutesPaginatedResponseDto
@@ -59,7 +62,19 @@ export class RoutesController {
         return this.routesService.getRoutesByUser(user.id, query.page, query.limit);
     }
 
+    @Get()
+    @ApiOkResponse({
+        description: 'Routes successfully received',
+        type: RoutesPaginatedResponseDto,
+    })
+    findAll(
+        @Query() query: RoutesQueryDto,
+    ): Promise<RoutesPaginatedResponseDto> {
+        return this.routesService.findAll(query);
+    }
+
     @Get(':id')
+    @UseGuards(OptionalJwtAuthGuard)
     @ApiOkResponse({
         description: 'Route successfully received',
         type: RouteDetailsResponseDto
@@ -69,9 +84,10 @@ export class RoutesController {
     })
     findOne(
         @Param('id', ParseIntPipe) id: number,
-        @CurrentUser() user: JwtUser
+        @CurrentUser() user: JwtUser | null
     ): Promise<RouteDetailsResponseDto> {
-        return this.routesService.findOne(id, user.id);
+        console.log('CURRENT USER:', user);
+        return this.routesService.findOne(id, user?.id);
     }
 
     @Patch(':id')
@@ -95,6 +111,7 @@ export class RoutesController {
     }
 
     @Delete(':id')
+    @UseGuards(JwtAuthGuard)
     @ApiNoContentResponse({
         description: 'Route successfully deleted',
     })
