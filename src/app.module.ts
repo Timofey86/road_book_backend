@@ -7,6 +7,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import {ConfigModule} from "@nestjs/config";
 import { StorageModule } from './modules/storage/storage.module';
 import { RoutesModule } from './modules/routes/routes.module';
+import { RouteStopsModule } from './modules/route-stops/route-stops.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { RoutesModule } from './modules/routes/routes.module';
       AuthModule,
       StorageModule,
       RoutesModule,
+      RouteStopsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

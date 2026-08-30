@@ -86,7 +86,7 @@ export class RoutesController {
         @Param('id', ParseIntPipe) id: number,
         @CurrentUser() user: JwtUser | null
     ): Promise<RouteDetailsResponseDto> {
-        console.log('CURRENT USER:', user);
+        // console.log('CURRENT USER:', user);
         return this.routesService.findOne(id, user?.id);
     }
 
