@@ -10,6 +10,7 @@ import { RoutesModule } from './modules/routes/routes.module';
 import { RouteStopsModule } from './modules/route-stops/route-stops.module';
 import { PlacesModule } from './modules/places/places.module';
 import {HttpModule} from "@nestjs/axios";
+import { RoutingModule } from './modules/routing/routing.module';
 
 @Module({
   imports: [
@@ -23,7 +24,8 @@ import {HttpModule} from "@nestjs/axios";
       RoutesModule,
       RouteStopsModule,
       PlacesModule,
-      HttpModule
+      HttpModule,
+      RoutingModule
   ],
   controllers: [AppController],
   providers: [AppService],

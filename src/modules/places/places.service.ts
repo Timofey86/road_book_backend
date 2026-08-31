@@ -20,13 +20,13 @@ export class PlacesService {
 
     async search(query: string): Promise<PlaceSearchResponseDto[]> {
         try {
-            const apiKey = this.configService.getOrThrow<string>('GEOCODING_API_KEY')
+            const apiKey = this.configService.getOrThrow<string>('ORS_API_KEY')
 
             const response = await firstValueFrom(
                 this.httpService.get<OrsGeocodingResponse>(
                     // 'https://api.heigit.org/pelias/v1/search',
                     'https://api.openrouteservice.org/geocode/search',
-                    //'https://api.openrouteservice.org/geocode/search' - без учета лимита до 28.09 надопоменять на 1 урл
+                    // todo 'https://api.openrouteservice.org/geocode/search' - без учета лимита до 28.09 надопоменять на 1 урл
                     {
                         headers: {
                             Authorization: apiKey,
