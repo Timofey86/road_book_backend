@@ -8,6 +8,8 @@ import {ConfigModule} from "@nestjs/config";
 import { StorageModule } from './modules/storage/storage.module';
 import { RoutesModule } from './modules/routes/routes.module';
 import { RouteStopsModule } from './modules/route-stops/route-stops.module';
+import { PlacesModule } from './modules/places/places.module';
+import {HttpModule} from "@nestjs/axios";
 
 @Module({
   imports: [
@@ -20,6 +22,8 @@ import { RouteStopsModule } from './modules/route-stops/route-stops.module';
       StorageModule,
       RoutesModule,
       RouteStopsModule,
+      PlacesModule,
+      HttpModule
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,4 +1,4 @@
-import {ForbiddenException, Injectable, NotFoundException} from '@nestjs/common';
+import {ForbiddenException, Injectable, Logger, NotFoundException} from '@nestjs/common';
 import {PrismaService} from "../../prisma/prisma.service";
 import {CreateRouteDto} from "./dto/create-route.dto";
 import slugify from "slugify";
@@ -14,6 +14,7 @@ import {Prisma} from "../../generated/prisma/client";
 
 @Injectable()
 export class RoutesService {
+    private readonly logger = new Logger(RoutesService.name);
     constructor(private readonly prismaService: PrismaService,
                 private readonly storageService: StorageService) {
     }
@@ -270,9 +271,11 @@ export class RoutesService {
 
         results.forEach((result, index) => {
             if (result.status === 'rejected') {
-                console.error(
-                    `Failed to delete file: ${objectKeys[index]}`,
-                    result.reason,
+                this.logger.warn(
+                    `Failed to delete object "${objectKeys[index]}"`,
+                    result.reason instanceof Error
+                        ? result.reason.stack
+                        : String(result.reason),
                 );
             }
         });
