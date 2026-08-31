@@ -1,4 +1,4 @@
-import {ForbiddenException, Injectable, Logger, NotFoundException} from '@nestjs/common';
+import {BadRequestException, ForbiddenException, Injectable, Logger, NotFoundException} from '@nestjs/common';
 import {PrismaService} from "../../prisma/prisma.service";
 import {CreateRouteDto} from "./dto/create-route.dto";
 import slugify from "slugify";
@@ -11,12 +11,16 @@ import {RoutesPaginatedResponseDto} from "./response/routes-paginated-response.d
 import {RouteListItemResponseDto} from "./response/route-list-item-response.dto";
 import {RouteSortBy, RoutesQueryDto} from "./dto/routes-query.dto";
 import {Prisma} from "../../generated/prisma/client";
+import {RoutingService} from "../routing/routing.service";
+import {RouteBuildResponseDto} from "./response/route-build-response.dto";
 
 @Injectable()
 export class RoutesService {
     private readonly logger = new Logger(RoutesService.name);
     constructor(private readonly prismaService: PrismaService,
-                private readonly storageService: StorageService) {
+                private readonly storageService: StorageService,
+                private readonly routingService: RoutingService,
+    ) {
     }
 
     async create(userId: number, dto: CreateRouteDto): Promise<RouteCreatedResponseDto> {
@@ -506,6 +510,76 @@ export class RoutesService {
                 totalItems,
                 totalPages: Math.ceil(totalItems / limit),
             },
+        };
+    }
+
+    async buildRoute(
+        routeId: number,
+        userId: number
+    ): Promise<RouteBuildResponseDto> {
+        const route = await this.prismaService.route.findUnique({
+            where: {
+                id: routeId,
+            },
+            include: {
+                stops: {
+                    orderBy: {
+                        position: 'asc',
+                    },
+                },
+            },
+        });
+
+        if (!route) {
+            throw new NotFoundException('Route not found');
+        }
+
+        if (route.userId !== userId) {
+            throw new ForbiddenException(
+                'You are not allowed to build this route',
+            );
+        }
+
+        if (route.stops.length < 2) {
+            throw new BadRequestException(
+                'Route must contain at least 2 stops',
+            );
+        }
+
+        const coordinates: [number, number][] =
+            route.stops.map((stop) => [
+                Number(stop.longitude),
+                Number(stop.latitude),
+            ]);
+
+        const routingResult = await this.routingService.buildRoute(coordinates);
+
+        const distanceMeters = Math.round(routingResult.distanceMeters);
+        const durationSeconds = Math.round(routingResult.durationSeconds);
+        const builtAt = new Date();
+        await this.prismaService.route.update({
+            where: {
+                id: routeId,
+            },
+            data: {
+                totalDistanceMeters: distanceMeters,
+                totalDurationSeconds: durationSeconds,
+                routeGeometry: routingResult.geometry,
+                routeBuiltAt: builtAt,
+                isRouteActual: true,
+            },
+            select: {
+                id: true,
+            },
+        });
+
+        return {
+            id: routeId,
+            totalDistanceMeters: distanceMeters,
+            totalDurationSeconds: durationSeconds,
+            routeGeometry: routingResult.geometry,
+            routeBuiltAt: builtAt,
+            isRouteActual: true,
         };
     }
 }

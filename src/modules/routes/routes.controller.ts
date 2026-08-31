@@ -18,12 +18,14 @@ import type {JwtUser} from "../../common/interfaces/jwt-user.interface";
 import {CurrentUser} from "../../common/decorators/current-user.decorator";
 import {RouteCreatedResponseDto} from "./response/route-created-response.dto";
 import {
+    ApiBadGatewayResponse,
+    ApiBadRequestResponse,
     ApiCookieAuth,
     ApiCreatedResponse,
     ApiForbiddenResponse, ApiNoContentResponse,
     ApiNotFoundResponse,
-    ApiOkResponse,
-    ApiTags
+    ApiOkResponse, ApiOperation,
+    ApiTags, ApiUnauthorizedResponse
 } from "@nestjs/swagger";
 import {RouteDetailsResponseDto} from "./response/route-details-response.dto";
 import {UpdateRouteDto} from "./dto/update-route.dto";
@@ -31,6 +33,7 @@ import {RoutesPaginatedResponseDto} from "./response/routes-paginated-response.d
 import {PaginationQueryDto} from "../../common/pagination/dto/pageination-query.dto";
 import {RoutesQueryDto} from "./dto/routes-query.dto";
 import {OptionalJwtAuthGuard} from "../auth/jwt-optional-auth.guard";
+import {RouteBuildResponseDto} from "./response/route-build-response.dto";
 
 @Controller('routes')
 @ApiTags('Routes')
@@ -127,5 +130,36 @@ export class RoutesController {
         @CurrentUser() user: JwtUser,
     ): Promise<void> {
         await this.routesService.remove(id, user.id);
+    }
+
+    @Post(':id/build')
+    @UseGuards(JwtAuthGuard)
+    @ApiOperation({
+        summary: 'Build route using saved stops',
+    })
+    @ApiOkResponse({
+        description: 'Route built successfully',
+        type: RouteBuildResponseDto,
+    })
+    @ApiUnauthorizedResponse({
+        description: 'Unauthorized',
+    })
+    @ApiForbiddenResponse({
+        description: 'User is not the owner of the route',
+    })
+    @ApiNotFoundResponse({
+        description: 'Route not found',
+    })
+    @ApiBadRequestResponse({
+        description: 'Route must contain at least 2 stops',
+    })
+    @ApiBadGatewayResponse({
+        description: 'Routing service is currently unavailable',
+    })
+    buildRoute(
+        @Param('id', ParseIntPipe) id: number,
+        @CurrentUser() user: JwtUser,
+    ): Promise<RouteBuildResponseDto> {
+        return this.routesService.buildRoute(id, user.id);
     }
 }
