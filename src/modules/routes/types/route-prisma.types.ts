@@ -1,5 +1,21 @@
 import {Prisma} from "../../../generated/prisma/client";
 
+export type RouteMutationEntity =
+    Prisma.RouteGetPayload<{
+        include: {
+            stops: {
+                orderBy: {
+                    position: 'asc';
+                };
+            };
+            routeTags: {
+                include: {
+                    tag: true;
+                };
+            };
+        };
+    }>;
+
 export type RouteDetailsEntity = Prisma.RouteGetPayload<{
     include: {
         user: {
@@ -11,6 +27,11 @@ export type RouteDetailsEntity = Prisma.RouteGetPayload<{
         };
         stops: true;
         photos: true;
+        routeTags: {
+            include: {
+                tag: true;
+            };
+        };
         likes: {
             select: {
                 userId: true;

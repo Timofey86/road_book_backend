@@ -1,4 +1,6 @@
 import {ApiProperty} from "@nestjs/swagger";
+import {TagResponseDto} from "../../tags/response/tag-response.dto";
+import {RouteStopResponseDto} from "../../route-stops/response/route-stop-response.dto";
 
 export class RouteAuthorResponseDto {
     @ApiProperty({ example: 2 })
@@ -83,10 +85,14 @@ export class RouteDetailsResponseDto {
     author: RouteAuthorResponseDto;
 
     @ApiProperty({
-        example: [],
-        type: [Object],
+        type: [RouteStopResponseDto],
     })
-    stops: object[];
+    stops: RouteStopResponseDto[];
+
+    @ApiProperty({
+        type: [TagResponseDto],
+    })
+    tags: TagResponseDto[];
 
     @ApiProperty({
         type: [RoutePhotoResponseDto],

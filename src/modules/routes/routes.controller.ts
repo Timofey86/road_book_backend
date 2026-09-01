@@ -8,15 +8,15 @@ import {
     Param,
     ParseIntPipe,
     Patch,
-    Post, Query,
+    Post, Put, Query,
     UseGuards
 } from '@nestjs/common';
-import {RoutesService} from "./routes.service";
+import {RoutesService} from "./services/routes.service";
 import {JwtAuthGuard} from "../auth/jwt-auth.guard";
 import {CreateRouteDto} from "./dto/create-route.dto";
 import type {JwtUser} from "../../common/interfaces/jwt-user.interface";
 import {CurrentUser} from "../../common/decorators/current-user.decorator";
-import {RouteCreatedResponseDto} from "./response/route-created-response.dto";
+import {RouteResponseDto} from "./response/route-response.dto";
 import {
     ApiBadGatewayResponse,
     ApiBadRequestResponse,
@@ -34,24 +34,28 @@ import {PaginationQueryDto} from "../../common/pagination/dto/pageination-query.
 import {RoutesQueryDto} from "./dto/routes-query.dto";
 import {OptionalJwtAuthGuard} from "../auth/jwt-optional-auth.guard";
 import {RouteBuildResponseDto} from "./response/route-build-response.dto";
+import {RoutesQueryService} from "./services/routes-query.service";
+import {UpdateRouteTagsDto} from "./dto/update-route-tags.dto";
 
 @Controller('routes')
 @ApiTags('Routes')
 @ApiCookieAuth('access_token')
 export class RoutesController {
-    constructor(private readonly routesService: RoutesService) {
-    }
+    constructor(
+        private readonly routesService: RoutesService,
+        private readonly queryService: RoutesQueryService
+    ) {}
 
     @Post()
     @UseGuards(JwtAuthGuard)
     @ApiCreatedResponse({
         description: 'Route successfully created',
-        type: RouteCreatedResponseDto,
+        type: RouteResponseDto,
     })
     create(
         @Body() dto: CreateRouteDto,
         @CurrentUser() user: JwtUser
-    ): Promise<RouteCreatedResponseDto> {
+    ): Promise<RouteResponseDto> {
         return this.routesService.create(user.id, dto);
     }
 
@@ -62,7 +66,7 @@ export class RoutesController {
         type: RoutesPaginatedResponseDto
     })
     findMyRoutes(@CurrentUser() user: JwtUser, @Query() query: PaginationQueryDto,) {
-        return this.routesService.getRoutesByUser(user.id, query.page, query.limit);
+        return this.queryService.getRoutesByUser(user.id, query.page, query.limit);
     }
 
     @Get()
@@ -73,7 +77,7 @@ export class RoutesController {
     findAll(
         @Query() query: RoutesQueryDto,
     ): Promise<RoutesPaginatedResponseDto> {
-        return this.routesService.findAll(query);
+        return this.queryService.findAll(query);
     }
 
     @Get(':id')
@@ -97,7 +101,7 @@ export class RoutesController {
     @UseGuards(JwtAuthGuard)
     @ApiOkResponse({
         description: 'Route successfully updated',
-        type: RouteCreatedResponseDto,
+        type: RouteResponseDto,
     })
     @ApiNotFoundResponse({
         description: 'Route not found',
@@ -109,7 +113,7 @@ export class RoutesController {
         @Param('id', ParseIntPipe) id: number,
         @Body() dto: UpdateRouteDto,
         @CurrentUser() user: JwtUser
-    ): Promise<RouteCreatedResponseDto> {
+    ): Promise<RouteResponseDto> {
         return this.routesService.update(id, user.id, dto);
     }
 
@@ -161,5 +165,31 @@ export class RoutesController {
         @CurrentUser() user: JwtUser,
     ): Promise<RouteBuildResponseDto> {
         return this.routesService.buildRoute(id, user.id);
+    }
+
+    @Put(':id/tags')
+    @UseGuards(JwtAuthGuard)
+    @ApiOperation({
+        summary: 'Replace route tags',
+    })
+    @ApiOkResponse({
+        description: 'Route tags updated successfully',
+        type: RouteResponseDto,
+    })
+    @ApiUnauthorizedResponse({
+        description: 'Unauthorized',
+    })
+    @ApiForbiddenResponse({
+        description: 'User is not the owner of the route',
+    })
+    @ApiNotFoundResponse({
+        description: 'Route not found',
+    })
+    updateTags(
+        @Param('id', ParseIntPipe) id: number,
+        @CurrentUser() user: JwtUser,
+        @Body() dto: UpdateRouteTagsDto,
+    ): Promise<RouteResponseDto> {
+        return this.routesService.updateTags(id, user.id, dto);
     }
 }

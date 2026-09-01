@@ -11,6 +11,7 @@ import { RouteStopsModule } from './modules/route-stops/route-stops.module';
 import { PlacesModule } from './modules/places/places.module';
 import {HttpModule} from "@nestjs/axios";
 import { RoutingModule } from './modules/routing/routing.module';
+import { TagsModule } from './modules/tags/tags.module';
 
 @Module({
   imports: [
@@ -25,7 +26,8 @@ import { RoutingModule } from './modules/routing/routing.module';
       RouteStopsModule,
       PlacesModule,
       HttpModule,
-      RoutingModule
+      RoutingModule,
+      TagsModule
   ],
   controllers: [AppController],
   providers: [AppService],
