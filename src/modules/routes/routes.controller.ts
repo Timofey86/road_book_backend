@@ -1,4 +1,5 @@
 import {
+    BadRequestException,
     Body,
     Controller,
     Delete,
@@ -8,8 +9,8 @@ import {
     Param,
     ParseIntPipe,
     Patch,
-    Post, Put, Query,
-    UseGuards
+    Post, Put, Query, UploadedFile,
+    UseGuards, UseInterceptors
 } from '@nestjs/common';
 import {RoutesService} from "./services/routes.service";
 import {JwtAuthGuard} from "../auth/jwt-auth.guard";
@@ -19,7 +20,7 @@ import {CurrentUser} from "../../common/decorators/current-user.decorator";
 import {RouteResponseDto} from "./response/route-response.dto";
 import {
     ApiBadGatewayResponse,
-    ApiBadRequestResponse,
+    ApiBadRequestResponse, ApiBody, ApiConsumes,
     ApiCookieAuth,
     ApiCreatedResponse,
     ApiForbiddenResponse, ApiNoContentResponse,
@@ -36,6 +37,8 @@ import {OptionalJwtAuthGuard} from "../auth/jwt-optional-auth.guard";
 import {RouteBuildResponseDto} from "./response/route-build-response.dto";
 import {RoutesQueryService} from "./services/routes-query.service";
 import {UpdateRouteTagsDto} from "./dto/update-route-tags.dto";
+import {FileInterceptor} from "@nestjs/platform-express";
+import {RouteCoverResponseDto} from "./response/route-cover-response.dto";
 
 @Controller('routes')
 @ApiTags('Routes')
@@ -191,5 +194,69 @@ export class RoutesController {
         @Body() dto: UpdateRouteTagsDto,
     ): Promise<RouteResponseDto> {
         return this.routesService.updateTags(id, user.id, dto);
+    }
+
+    @Post(':id/cover')
+    @UseGuards(JwtAuthGuard)
+    @UseInterceptors(
+        FileInterceptor('file', {
+            limits: {
+                fileSize: 5 * 1024 * 1024,
+            },
+            fileFilter: (_req, file, callback) => {
+                const allowedMimeTypes = [
+                    'image/jpeg',
+                    'image/png',
+                    'image/webp',
+                ];
+
+                if (!allowedMimeTypes.includes(file.mimetype)) {
+                    return callback(
+                        new BadRequestException(
+                            'Only JPEG, PNG and WebP images are allowed',
+                        ),
+                        false,
+                    );
+                }
+
+                callback(null, true);
+            },
+        }),
+    )
+    @ApiOperation({
+        summary: 'Upload or replace route cover',
+    })
+    @ApiConsumes('multipart/form-data')
+    @ApiBody({
+        schema: {
+            type: 'object',
+            properties: {
+                file: {
+                    type: 'string',
+                    format: 'binary',
+                },
+            },
+            required: ['file'],
+        },
+    })
+    @ApiOkResponse({
+        description: 'Route cover uploaded successfully',
+        type: RouteCoverResponseDto,
+    })
+    @ApiUnauthorizedResponse({
+        description: 'Unauthorized',
+    })
+    @ApiForbiddenResponse({
+        description: 'User is not the owner of the route',
+    })
+    @ApiNotFoundResponse({
+        description: 'Route not found',
+    })
+    uploadCover(
+        @Param('id', ParseIntPipe) routeId: number,
+        @CurrentUser() user: JwtUser,
+        @UploadedFile() file: Express.Multer.File,
+    ): Promise<RouteCoverResponseDto> {
+        return this.routesService.uploadCover(routeId, user.id, file);
     }
 }

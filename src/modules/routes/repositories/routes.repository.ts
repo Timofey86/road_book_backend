@@ -378,4 +378,35 @@ export class RoutesRepository {
             });
         });
     }
+
+    findForCover(routeId: number) {
+        return this.prisma.route.findUnique({
+            where: {
+                id: routeId,
+            },
+            select: {
+                id: true,
+                userId: true,
+                coverObjectKey: true,
+            },
+        });
+    }
+
+    updateCover(
+        routeId: number,
+        coverObjectKey: string,
+    ) {
+        return this.prisma.route.update({
+            where: {
+                id: routeId,
+            },
+            data: {
+                coverObjectKey,
+            },
+            select: {
+                id: true,
+                coverObjectKey: true,
+            },
+        });
+    }
 }
