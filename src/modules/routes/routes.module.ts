@@ -8,6 +8,7 @@ import {TagsModule} from "../tags/tags.module";
 import {RouteMapper} from "./mappers/route.mapper";
 import {RoutesRepository} from "./repositories/routes.repository";
 import {RoutesQueryService} from "./services/routes-query.service";
+import {RoutePhotosModule} from "../route-photos/route-photos.module";
 
 
 @Module({
@@ -23,6 +24,7 @@ import {RoutesQueryService} from "./services/routes-query.service";
         StorageModule,
         RoutingModule,
         TagsModule,
+        RoutePhotosModule
     ],
     exports: [RoutesService]
 })

@@ -25,8 +25,16 @@ export type RouteDetailsEntity = Prisma.RouteGetPayload<{
                 avatarObjectKey: true;
             };
         };
-        stops: true;
-        photos: true;
+        stops: {
+            orderBy: {
+                position: 'asc';
+            };
+        };
+        photos: {
+            orderBy: {
+                position: 'asc';
+            };
+        };
         routeTags: {
             include: {
                 tag: true;

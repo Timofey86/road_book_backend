@@ -1,4 +1,4 @@
-import {Injectable} from '@nestjs/common';
+import {Injectable, Logger} from '@nestjs/common';
 import {
     CreateBucketCommand,
     DeleteObjectCommand, GetObjectCommand,
@@ -14,6 +14,7 @@ export class StorageService {
     private readonly s3: S3Client
     private readonly bucket: string;
     private readonly publicS3: S3Client;
+    private readonly logger = new Logger(StorageService.name);
 
     constructor(
         private readonly configService: ConfigService,
@@ -104,5 +105,18 @@ export class StorageService {
         return getSignedUrl(this.publicS3, command, {
             expiresIn: 60 * 60,
         });
+    }
+
+    async safeDelete(objectKey: string): Promise<void> {
+        try {
+            await this.delete(objectKey);
+        } catch (error) {
+            this.logger.warn(
+                `Failed to delete object "${objectKey}"`,
+                error instanceof Error
+                    ? error.stack
+                    : String(error),
+            );
+        }
     }
 }

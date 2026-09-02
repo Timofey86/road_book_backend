@@ -19,6 +19,7 @@ import {TagsService} from '../../tags/tags.service';
 import {UpdateRouteTagsDto} from "../dto/update-route-tags.dto";
 import {randomUUID} from "node:crypto";
 import {RouteCoverResponseDto} from "../response/route-cover-response.dto";
+import { getImageExtension } from '../../../common/utils/image.utils';
 
 @Injectable()
 export class RoutesService {
@@ -274,9 +275,7 @@ export class RoutesService {
         }
 
         const oldObjectKey = route.coverObjectKey;
-
-        const extension = this.getImageExtension(file.mimetype);
-
+        const extension = getImageExtension(file.mimetype);
         const objectKey = `routes/${routeId}/cover/${randomUUID()}.${extension}`;
 
         await this.storageService.upload(
@@ -288,12 +287,12 @@ export class RoutesService {
         try {
             await this.routesRepository.updateCover(routeId, objectKey);
         } catch (error) {
-            await this.safeDeleteObject(objectKey);
+            await this.storageService.safeDelete(objectKey);
             throw error;
         }
 
         if (oldObjectKey) {
-            await this.safeDeleteObject(oldObjectKey);
+            await this.storageService.safeDelete(oldObjectKey);
         }
 
         const coverUrl = await this.storageService.getSignedUrl(objectKey);
@@ -301,42 +300,5 @@ export class RoutesService {
         return {
             coverUrl,
         };
-    }
-
-    private getImageExtension(
-        mimetype: string,
-    ): string {
-        switch (mimetype) {
-            case 'image/jpeg':
-                return 'jpg';
-
-            case 'image/png':
-                return 'png';
-
-            case 'image/webp':
-                return 'webp';
-
-            default:
-                throw new BadRequestException(
-                    'Unsupported image type',
-                );
-        }
-    }
-
-    private async safeDeleteObject(
-        objectKey: string,
-    ): Promise<void> {
-        try {
-            await this.storageService.delete(
-                objectKey,
-            );
-        } catch (error) {
-            this.logger.warn(
-                `Failed to delete object "${objectKey}"`,
-                error instanceof Error
-                    ? error.stack
-                    : String(error),
-            );
-        }
     }
 }

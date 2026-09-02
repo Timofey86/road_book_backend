@@ -106,7 +106,11 @@ export class RoutesRepository {
                         position: 'asc',
                     },
                 },
-                photos: true,
+                photos: {
+                    orderBy: {
+                        position: 'asc',
+                    },
+                },
                 routeTags: {
                     include: {
                         tag: true,

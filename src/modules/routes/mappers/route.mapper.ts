@@ -7,11 +7,13 @@ import {RouteDetailsEntity, RouteListEntity, RouteMutationEntity} from "../types
 import {RouteListItemResponseDto} from "../response/route-list-item-response.dto";
 import {RouteResponseDto} from "../response/route-response.dto";
 import {RouteDetailsResponseDto} from "../response/route-details-response.dto";
+import {RoutePhotosMapper} from "../../route-photos/mappers/route-photos.mapper";
 
 @Injectable()
 export class RouteMapper {
     constructor(
         private readonly storageService: StorageService,
+        private readonly routePhotosMapper: RoutePhotosMapper
     ) {}
 
     mapRouteStop(stop: RouteStop): RouteStopResponseDto {
@@ -72,12 +74,7 @@ export class RouteMapper {
             this.getOptionalSignedUrl(route.coverObjectKey),
             this.getOptionalSignedUrl(route.user.avatarObjectKey),
 
-            Promise.all(
-                route.photos.map(async (photo) => ({
-                    id: photo.id,
-                    url: await this.getOptionalSignedUrl(photo.objectKey),
-                })),
-            ),
+            await this.routePhotosMapper.mapMany(route.photos),
         ]);
 
         return {

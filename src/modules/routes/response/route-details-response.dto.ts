@@ -1,6 +1,7 @@
 import {ApiProperty} from "@nestjs/swagger";
 import {TagResponseDto} from "../../tags/response/tag-response.dto";
 import {RouteStopResponseDto} from "../../route-stops/response/route-stop-response.dto";
+import {RoutePhotoResponseDto} from "../../route-photos/response/route-photos-response.dto";
 
 export class RouteAuthorResponseDto {
     @ApiProperty({ example: 2 })
@@ -14,17 +15,6 @@ export class RouteAuthorResponseDto {
         nullable: true,
     })
     avatarUrl: string | null;
-}
-
-export class RoutePhotoResponseDto {
-    @ApiProperty({ example: 10 })
-    id: number;
-
-    @ApiProperty({
-        example: 'http://localhost:9000/...',
-        nullable: true,
-    })
-    url: string | null;
 }
 
 export class RouteDetailsResponseDto {

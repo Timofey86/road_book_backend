@@ -39,6 +39,7 @@ import {RoutesQueryService} from "./services/routes-query.service";
 import {UpdateRouteTagsDto} from "./dto/update-route-tags.dto";
 import {FileInterceptor} from "@nestjs/platform-express";
 import {RouteCoverResponseDto} from "./response/route-cover-response.dto";
+import {isAllowedImageMimeType} from "../../common/utils/image.utils";
 
 @Controller('routes')
 @ApiTags('Routes')
@@ -204,13 +205,7 @@ export class RoutesController {
                 fileSize: 5 * 1024 * 1024,
             },
             fileFilter: (_req, file, callback) => {
-                const allowedMimeTypes = [
-                    'image/jpeg',
-                    'image/png',
-                    'image/webp',
-                ];
-
-                if (!allowedMimeTypes.includes(file.mimetype)) {
+                if (!isAllowedImageMimeType(file.mimetype)) {
                     return callback(
                         new BadRequestException(
                             'Only JPEG, PNG and WebP images are allowed',
