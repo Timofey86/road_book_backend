@@ -13,6 +13,7 @@ import {HttpModule} from "@nestjs/axios";
 import { RoutingModule } from './modules/routing/routing.module';
 import { TagsModule } from './modules/tags/tags.module';
 import { RoutePhotosModule } from './modules/route-photos/route-photos.module';
+import { CommentsModule } from './modules/comments/comments.module';
 
 @Module({
   imports: [
@@ -29,7 +30,8 @@ import { RoutePhotosModule } from './modules/route-photos/route-photos.module';
       HttpModule,
       RoutingModule,
       TagsModule,
-      RoutePhotosModule
+      RoutePhotosModule,
+      CommentsModule
   ],
   controllers: [AppController],
   providers: [AppService],
