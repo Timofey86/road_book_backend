@@ -62,11 +62,16 @@ export class RoutesQueryService {
             sortOrder,
             minDistance,
             maxDistance,
+            userId
         } = query;
 
         const skip = (page - 1) * limit;
         const normalizedSearch = search?.trim();
         const where: Prisma.RouteWhereInput = {
+            ...(userId !== undefined && {
+                userId,
+            }),
+
             ...(normalizedSearch && {
                 OR: [
                     {

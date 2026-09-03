@@ -1,46 +1,48 @@
-import {BadRequestException, ConflictException, Injectable, NotFoundException} from '@nestjs/common';
-import {PrismaService} from "../../prisma/prisma.service";
-import {UserResponseDto} from "./response/user-response.dto";
+import {BadRequestException, Injectable, Logger, NotFoundException} from '@nestjs/common';
 import {UpdateUserDto} from "./dto/update-user.dto";
-import {PreferredLanguage, Prisma} from "../../generated/prisma/client";
 import {StorageService} from "../storage/storage.service";
 import {randomUUID} from "node:crypto";
+import {UserMapper} from "./mappers/user.mapper";
+import {UsersRepository} from "./repositories/user.repository";
+import {CurrentUserResponseDto} from "./response/current-user-response.dto";
+import {PublicUserResponseDto} from "./response/public-user-response.dto";
 
 @Injectable()
 export class UsersService {
+    private readonly logger = new Logger(UsersService.name);
+
     constructor(
-        private readonly prismaService: PrismaService,
+        private readonly usersRepository: UsersRepository,
         private readonly storageService: StorageService,
+        private readonly userMapper: UserMapper,
     ) {
     }
 
-    async toResponseDto(
-        user: {
-            id: number;
-            name: string;
-            email: string;
-            bio: string | null;
-            avatarObjectKey: string | null;
-            preferredLanguage: PreferredLanguage;
-            createdAt: Date;
-            updatedAt: Date;
-        },
-    ): Promise<UserResponseDto> {
-        const avatarUrl = user.avatarObjectKey
-            ? await this.storageService.getSignedUrl(user.avatarObjectKey)
-            : null;
-
-        return {
-            ...user,
-            avatarUrl,
-        };
-    }
-
     findByEmail(email: string) {
-        return this.prismaService.user.findUnique({
-            where: {email},
-        });
+        return this.usersRepository.findByEmail(email);
     }
+
+    // async toResponseDto(
+    //     user: {
+    //         id: number;
+    //         name: string;
+    //         email: string;
+    //         bio: string | null;
+    //         avatarObjectKey: string | null;
+    //         preferredLanguage: PreferredLanguage;
+    //         createdAt: Date;
+    //         updatedAt: Date;
+    //     },
+    // ): Promise<UserResponseDto> {
+    //     const avatarUrl = user.avatarObjectKey
+    //         ? await this.storageService.getSignedUrl(user.avatarObjectKey)
+    //         : null;
+    //
+    //     return {
+    //         ...user,
+    //         avatarUrl,
+    //     };
+    // }
 
     create(data: {
         name: string;
@@ -48,57 +50,58 @@ export class UsersService {
         passwordHash: string;
         bio?: string;
     }) {
-        return this.prismaService.user.create({
-            data,
-            omit: {
-                passwordHash: true,
-            },
-        });
+        return this.usersRepository.create(data);
     }
 
-    async findById(id: number): Promise<UserResponseDto | null> {
-        const user = await this.prismaService.user.findUnique({
-            where: {id},
-            omit: {
-                passwordHash: true,
-            },
-        });
+    async findMe(userId: number): Promise<CurrentUserResponseDto> {
+        const [user, receivedLikesCount] = await Promise.all([
+            this.usersRepository.findByIdWithStats(userId),
+            this.usersRepository.countReceivedLikes(userId),
+        ]);
 
         if (!user) {
-            return null;
+            throw new NotFoundException('User not found');
         }
 
-        return this.toResponseDto(user);
+        return this.userMapper.mapCurrentUser(
+            user,
+            receivedLikesCount,
+        );
     }
 
-    async update(id: number, dto: UpdateUserDto): Promise<UserResponseDto> {
-        try {
-            const user = await this.prismaService.user.update({
-                where: {id},
-                data: dto,
-                omit: {
-                    passwordHash: true,
-                },
-            });
+    async findPublicProfile(
+        userId: number,
+    ): Promise<PublicUserResponseDto> {
+        const [user, receivedLikesCount] = await Promise.all([
+            this.usersRepository.findByIdWithStats(userId),
+            this.usersRepository.countReceivedLikes(userId),
+        ]);
 
-            return this.toResponseDto(user);
-
-        } catch (error) {
-            if (
-                error instanceof Prisma.PrismaClientKnownRequestError &&
-                error.code === 'P2002'
-            ) {
-                throw new ConflictException('User with this email already exists');
-            }
-
-            throw error;
+        if (!user) {
+            throw new NotFoundException('User not found');
         }
+
+        return this.userMapper.mapPublicUser(
+            user,
+            receivedLikesCount,
+        );
+    }
+
+    async update(
+        userId: number,
+        dto: UpdateUserDto,
+    ): Promise<CurrentUserResponseDto> {
+        await this.ensureUserExists(userId);
+
+        await this.usersRepository.update(userId, dto);
+
+        return this.findMe(userId);
     }
 
     async uploadAvatar(
         userId: number,
         file: Express.Multer.File,
-    ) {
+    ): Promise<CurrentUserResponseDto> {
         if (!file) {
             throw new BadRequestException('Avatar file is required');
         }
@@ -115,93 +118,109 @@ export class UsersService {
             throw new BadRequestException('Unsupported image type');
         }
 
-        const objectionKey = `avatars/${userId}/${randomUUID()}${extension}`;
-
-        const user = await this.prismaService.user.findUnique({
-            where: {id: userId},
-            select: {
-                avatarObjectKey: true
-            }
-        })
+        const user = await this.usersRepository.findAvatar(userId);
 
         if (!user) {
-            throw new NotFoundException(' User not found');
+            throw new NotFoundException('User not found');
         }
 
+        const oldObjectKey = user.avatarObjectKey;
+        const newObjectKey =
+            `avatars/${userId}/${randomUUID()}${extension}`;
+
         await this.storageService.upload(
-            objectionKey,
+            newObjectKey,
             file.buffer,
-            file.mimetype
+            file.mimetype,
         );
 
         try {
-            const updatedUser = await this.prismaService.user.update({
-                where: {id: userId},
-                data: {
-                    avatarObjectKey: objectionKey
-                },
-                omit: {
-                    passwordHash: true,
-                }
-            })
-
-            if (user.avatarObjectKey) {
-                await this.storageService.delete(user.avatarObjectKey);
-            }
-            return this.toResponseDto(updatedUser);
+            await this.usersRepository.updateAvatar(
+                userId,
+                newObjectKey,
+            );
         } catch (error) {
-            await this.storageService.delete(objectionKey);
-
+            await this.safeDeleteObject(newObjectKey);
             throw error;
         }
+
+        if (oldObjectKey) {
+            await this.safeDeleteObject(oldObjectKey);
+        }
+
+        return this.findMe(userId);
     }
 
-    async deleteAvatar(userId: number): Promise<UserResponseDto> {
-        const user = await this.prismaService.user.findUnique({
-            where: {id: userId},
-            omit: {
-                passwordHash: true,
-            }
-        })
+    async deleteAvatar(
+        userId: number,
+    ): Promise<CurrentUserResponseDto> {
+        const user = await this.usersRepository.findAvatar(userId);
 
         if (!user) {
-            throw new NotFoundException('user not found')
+            throw new NotFoundException('User not found');
         }
 
-        if (user.avatarObjectKey) {
-            await this.storageService.delete(user.avatarObjectKey)
+        const oldObjectKey = user.avatarObjectKey;
+
+        await this.usersRepository.updateAvatar(userId, null);
+
+        if (oldObjectKey) {
+            await this.safeDeleteObject(oldObjectKey);
         }
 
-        const updatedUser = await this.prismaService.user.update({
-            where: {id: userId},
-            data: {
-                avatarObjectKey: null
-            },
-            omit: {
-                passwordHash: true,
-            }
-        })
-
-        return this.toResponseDto(updatedUser)
+        return this.findMe(userId);
     }
 
-    async deleteUser(userId: number) {
-        const user = await this.prismaService.user.findUnique({
-            where: { id: userId },
-            select: {
-                id: true,
-                avatarObjectKey: true,
-            },
-        });
+    async deleteUser(userId: number): Promise<void> {
+        const user = await this.usersRepository.findForDelete(userId);
 
         if (!user) {
-            throw new NotFoundException('User not found')
+            throw new NotFoundException('User not found');
         }
 
-        await this.prismaService.user.delete({where: {id: userId}})
+        const objectKeys: string[] = [];
 
         if (user.avatarObjectKey) {
-            await this.storageService.delete(user.avatarObjectKey)
+            objectKeys.push(user.avatarObjectKey);
+        }
+
+        for (const route of user.routes) {
+            if (route.coverObjectKey) {
+                objectKeys.push(route.coverObjectKey);
+            }
+
+            for (const photo of route.photos) {
+                objectKeys.push(photo.objectKey);
+            }
+        }
+
+        await this.usersRepository.delete(userId);
+
+        await Promise.allSettled(
+            objectKeys.map((objectKey) =>
+                this.safeDeleteObject(objectKey),
+            ),
+        );
+    }
+
+    private async ensureUserExists(userId: number): Promise<void> {
+        const user = await this.usersRepository.findById(userId);
+
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
+    }
+
+    private async safeDeleteObject(
+        objectKey: string,
+    ): Promise<void> {
+        try {
+            await this.storageService.delete(objectKey);
+        } catch (error) {
+            this.logger.warn(
+                `Failed to delete storage object: ${objectKey}`,
+                error,
+            );
         }
     }
 }

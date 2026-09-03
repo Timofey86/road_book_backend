@@ -3,12 +3,7 @@ import {PassportStrategy} from "@nestjs/passport";
 import {ExtractJwt, Strategy} from "passport-jwt";
 import {ConfigService} from "@nestjs/config";
 import type { Request } from 'express';
-
-
-interface JwtPayload {
-    sub: number;
-    email: string;
-}
+import {JwtPayload} from "../../common/interfaces/jwt-user.interface";
 
 const accessTokenExtractor = (request: Request): string | null => {
     return request?.cookies?.access_token ?? null;

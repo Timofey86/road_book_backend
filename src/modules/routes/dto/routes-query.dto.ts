@@ -71,4 +71,14 @@ export class RoutesQueryDto extends PaginationQueryDto {
     @IsInt()
     @Min(0)
     stopsCount?: number;
+
+    @IsOptional()
+    @Type(() => Number)
+    @IsInt()
+    @Min(1)
+    @ApiPropertyOptional({
+        example: 5,
+        description: 'Filter routes by user ID',
+    })
+    userId?: number;
 }

@@ -2,7 +2,7 @@ import {
     Body,
     Controller, Delete, FileTypeValidator,
     Get, HttpCode, HttpStatus,
-    MaxFileSizeValidator, ParseFilePipe,
+    MaxFileSizeValidator, Param, ParseFilePipe, ParseIntPipe,
     Patch,
     Post,
     UploadedFile,
@@ -14,58 +14,48 @@ import {JwtAuthGuard} from "../auth/jwt-auth.guard";
 import {CurrentUser} from "../../common/decorators/current-user.decorator";
 import type {JwtUser} from "../../common/interfaces/jwt-user.interface";
 import {UpdateUserDto} from "./dto/update-user.dto";
-import {UserResponseDto} from "./response/user-response.dto";
 import {FileInterceptor} from "@nestjs/platform-express";
 import {
     ApiBody,
     ApiConsumes, ApiCookieAuth,
-    ApiCreatedResponse,
+    ApiCreatedResponse, ApiNoContentResponse,
     ApiOkResponse,
-    ApiOperation, ApiResponse,
+    ApiOperation,
     ApiTags, ApiUnauthorizedResponse
 } from "@nestjs/swagger";
+import {CurrentUserResponseDto} from "./response/current-user-response.dto";
+import {PublicUserResponseDto} from "./response/public-user-response.dto";
 
 @ApiTags('Users')
-@ApiCookieAuth('access_token')
-@ApiUnauthorizedResponse({
-    description: 'Unauthorized',
-})
 @Controller('users')
 export class UsersController {
     constructor(private readonly usersService: UsersService){}
 
-
-    @Get('me')
-    @UseGuards(JwtAuthGuard)
-    @ApiOperation({
-        summary: 'Get current user profile',
-        description: 'Returns the profile of the currently authenticated user.',
-    })
-    @ApiOkResponse({
-        description: 'Current user profile',
-        type: UserResponseDto,
-    })
-    getMe(@CurrentUser() user: JwtUser):Promise<UserResponseDto | null> {
-        return this.usersService.findById(user.id);
-    }
-
     @Patch('me')
     @UseGuards(JwtAuthGuard)
+    @ApiCookieAuth('access_token')
+    @ApiUnauthorizedResponse({
+        description: 'Unauthorized',
+    })
     @ApiOkResponse({
         description: 'User profile successfully updated',
-        type: UserResponseDto,
+        type: CurrentUserResponseDto,
     })
     @ApiOperation({
         summary: 'Update current user profile',
         description:
             'Updates profile information of the currently authenticated user.',
     })
-    updateMe(@CurrentUser() user: JwtUser, @Body() dto: UpdateUserDto): Promise<UserResponseDto> {
+    updateMe(@CurrentUser() user: JwtUser, @Body() dto: UpdateUserDto): Promise<CurrentUserResponseDto> {
         return this.usersService.update(user.id, dto);
     }
 
     @Post('me/avatar')
     @UseGuards(JwtAuthGuard)
+    @ApiCookieAuth('access_token')
+    @ApiUnauthorizedResponse({
+        description: 'Unauthorized',
+    })
     @ApiOperation({
         summary: 'Upload user avatar',
         description:
@@ -87,7 +77,7 @@ export class UsersController {
     })
     @ApiCreatedResponse({
         description: 'Avatar successfully uploaded',
-        type: UserResponseDto,
+        type: CurrentUserResponseDto,
     })
     @UseInterceptors(FileInterceptor('avatar'))
     uploadAvatar(
@@ -105,33 +95,61 @@ export class UsersController {
                 fileIsRequired: true,
             }),
         ) file: Express.Multer.File
-    ):Promise<UserResponseDto> {
+    ):Promise<CurrentUserResponseDto> {
         return this.usersService.uploadAvatar(user.id, file);
     }
 
     @Delete('me/avatar')
     @UseGuards(JwtAuthGuard)
+    @ApiCookieAuth('access_token')
+    @ApiUnauthorizedResponse({
+        description: 'Unauthorized',
+    })
     @ApiOkResponse({
         description: 'Avatar successfully deleted',
-        type: UserResponseDto,
+        type: CurrentUserResponseDto,
     })
     @ApiOperation({
         summary: 'Delete user avatar',
         description:
             'Deletes the avatar of the currently authenticated user.',
     })
-    deleteAvatar(@CurrentUser() user: JwtUser):Promise<UserResponseDto> {
+    deleteAvatar(@CurrentUser() user: JwtUser):Promise<CurrentUserResponseDto> {
         return this.usersService.deleteAvatar(user.id);
     }
 
     @Delete('me')
     @UseGuards(JwtAuthGuard)
+    @ApiCookieAuth('access_token')
+    @ApiUnauthorizedResponse({
+        description: 'Unauthorized',
+    })
     @HttpCode(HttpStatus.NO_CONTENT)
-    @ApiResponse({
-        status: HttpStatus.NO_CONTENT,
+    @ApiOperation({
+        summary: 'Delete current user account',
+        description:
+            'Deletes the currently authenticated user account.',
+    })
+    @ApiNoContentResponse({
         description: 'User deleted successfully',
     })
-    deleteUser(@CurrentUser() user: JwtUser): Promise<void> {
-        return this.usersService.deleteUser(user.id);
+    async deleteUser(@CurrentUser() user: JwtUser): Promise<void> {
+        await this.usersService.deleteUser(user.id);
+    }
+
+    @Get(':id')
+    @ApiOperation({
+        summary: 'Get public user profile',
+        description:
+            'Returns public profile information for the specified user.',
+    })
+    @ApiOkResponse({
+        description: 'Public user profile',
+        type: PublicUserResponseDto,
+    })
+    getPublicProfile(
+        @Param('id', ParseIntPipe) id: number,
+    ): Promise<PublicUserResponseDto> {
+        return this.usersService.findPublicProfile(id);
     }
 }

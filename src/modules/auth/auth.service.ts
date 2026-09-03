@@ -3,11 +3,11 @@ import {UsersService} from "../users/users.service";
 import * as bcrypt from 'bcrypt';
 import {RegisterDto} from "./dto/register.dto";
 import {Prisma} from "../../generated/prisma/client";
-import {UserResponseDto} from "../users/response/user-response.dto";
 import {JwtService} from "@nestjs/jwt";
 import {LoginDto} from "./dto/login.dto";
 import {ConfigService} from "@nestjs/config";
 import {JwtPayload} from "../../common/interfaces/jwt-user.interface";
+import {CurrentUserResponseDto} from "../users/response/current-user-response.dto";
 
 @Injectable()
 export class AuthService {
@@ -17,24 +17,32 @@ export class AuthService {
     ) {
     }
 
-    async register(dto: RegisterDto): Promise<UserResponseDto> {
+    getMe(userId: number): Promise<CurrentUserResponseDto> {
+        return this.usersService.findMe(userId);
+    }
+
+    async register(dto: RegisterDto): Promise<CurrentUserResponseDto> {
+        const email = dto.email.trim().toLowerCase();
+
         try {
-            const existingUser = await this.usersService.findByEmail(dto.email);
+            const existingUser = await this.usersService.findByEmail(email);
 
             if (existingUser) {
-                throw new ConflictException('User with this email already exists');
+                throw new ConflictException(
+                    'User with this email already exists',
+                );
             }
 
             const passwordHash = await bcrypt.hash(dto.password, 10);
 
             const user = await this.usersService.create({
                 name: dto.name,
-                email: dto.email,
+                email,
                 passwordHash,
                 bio: dto.bio,
             });
 
-            return this.usersService.toResponseDto(user);
+            return this.usersService.findMe(user.id);
         } catch (error) {
             if (
                 error instanceof Prisma.PrismaClientKnownRequestError &&
@@ -53,7 +61,8 @@ export class AuthService {
         accessToken: string;
         refreshToken: string;
     }> {
-        const user = await this.usersService.findByEmail(dto.email);
+        const email = dto.email.trim().toLowerCase();
+        const user = await this.usersService.findByEmail(email);
 
         if (!user) {
             throw new UnauthorizedException('Invalid email or password');
@@ -62,7 +71,7 @@ export class AuthService {
         const passwordMatches = await bcrypt.compare(dto.password, user.passwordHash)
 
         if (!passwordMatches) {
-            throw new UnauthorizedException('Invalid password or email');
+            throw new UnauthorizedException('Invalid email or password');
         }
 
         const [accessToken, refreshToken] = await Promise.all([
@@ -119,6 +128,16 @@ export class AuthService {
                             ),
                     },
                 );
+
+            const user = await this.usersService.findByEmail(
+                payload.email,
+            );
+
+            if (!user || user.id !== payload.sub) {
+                throw new UnauthorizedException(
+                    'Invalid refresh token',
+                );
+            }
 
             return this.createAccessToken(
                 payload.sub,

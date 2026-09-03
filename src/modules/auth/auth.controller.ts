@@ -1,19 +1,33 @@
-import {Body, Controller, HttpCode, HttpStatus, Post, Req, Res, UnauthorizedException} from '@nestjs/common';
+import {
+    Body,
+    Controller,
+    Get,
+    HttpCode,
+    HttpStatus,
+    Post,
+    Req,
+    Res,
+    UnauthorizedException,
+    UseGuards
+} from '@nestjs/common';
 import {AuthService} from "./auth.service";
 import {RegisterDto} from "./dto/register.dto";
-import {UserResponseDto} from "../users/response/user-response.dto";
 import {LoginDto} from "./dto/login.dto";
 import type { Response, Request } from 'express';
 
 import {
-    ApiConflictResponse,
-    ApiCreatedResponse, ApiNoContentResponse,
+    ApiConflictResponse, ApiCookieAuth,
+    ApiCreatedResponse, ApiNoContentResponse, ApiOkResponse,
     ApiOperation,
     ApiTags,
     ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import {ConfigService} from "@nestjs/config";
 import {getAccessCookieOptions, getRefreshCookieOptions} from "./config/cookie.config";
+import {CurrentUserResponseDto} from "../users/response/current-user-response.dto";
+import {JwtAuthGuard} from "./jwt-auth.guard";
+import {CurrentUser} from "../../common/decorators/current-user.decorator";
+import type {JwtUser} from "../../common/interfaces/jwt-user.interface";
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -29,12 +43,12 @@ export class AuthController {
     })
     @ApiCreatedResponse({
         description: 'User successfully registered',
-        type: UserResponseDto,
+        type: CurrentUserResponseDto,
     })
     @ApiConflictResponse({
         description: 'User with this email already exists',
     })
-    register(@Body() dto: RegisterDto): Promise<UserResponseDto> {
+    register(@Body() dto: RegisterDto): Promise<CurrentUserResponseDto> {
         return this.authService.register(dto);
     }
 
@@ -69,6 +83,23 @@ export class AuthController {
             refreshToken,
             getRefreshCookieOptions(isProduction),
         );
+    }
+
+    @Get('me')
+    @UseGuards(JwtAuthGuard)
+    @ApiCookieAuth('access_token')
+    @ApiOperation({
+        summary: 'Get current authenticated user',
+    })
+    @ApiOkResponse({
+        description: 'Current authenticated user',
+        type: CurrentUserResponseDto,
+    })
+    @ApiUnauthorizedResponse({
+        description: 'Unauthorized',
+    })
+    getMe(@CurrentUser() user: JwtUser): Promise<CurrentUserResponseDto> {
+        return this.authService.getMe(user.id);
     }
 
     @Post('logout')
@@ -120,7 +151,7 @@ export class AuthController {
             request.cookies?.refresh_token;
 
         if (!refreshToken) {
-            throw new UnauthorizedException();
+            throw new UnauthorizedException('Refresh token is missing');
         }
 
         const accessToken =
