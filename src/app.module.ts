@@ -15,6 +15,7 @@ import { TagsModule } from './modules/tags/tags.module';
 import { RoutePhotosModule } from './modules/route-photos/route-photos.module';
 import { CommentsModule } from './modules/comments/comments.module';
 import { LikesModule } from './modules/likes/likes.module';
+import { FavoritesModule } from './modules/favorites/favorites.module';
 
 @Module({
   imports: [
@@ -33,7 +34,8 @@ import { LikesModule } from './modules/likes/likes.module';
       TagsModule,
       RoutePhotosModule,
       CommentsModule,
-      LikesModule
+      LikesModule,
+      FavoritesModule
   ],
   controllers: [AppController],
   providers: [AppService],

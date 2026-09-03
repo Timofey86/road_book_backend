@@ -26,7 +26,10 @@ import {RoutePhotosModule} from "../route-photos/route-photos.module";
         TagsModule,
         RoutePhotosModule
     ],
-    exports: [RoutesService]
+    exports: [
+        RoutesService,
+        RouteMapper
+    ],
 })
 export class RoutesModule {
 }
