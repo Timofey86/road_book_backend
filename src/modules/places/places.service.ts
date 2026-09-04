@@ -35,6 +35,7 @@ export class PlacesService {
                             text: query,
                             size: 5,
                         },
+                        timeout: 5000
                     },
                 )
             )
@@ -68,9 +69,10 @@ export class PlacesService {
                 );
             }
 
-            throw new BadGatewayException(
-                'Geocoding service is currently unavailable',
-            );
+            throw new BadGatewayException({
+                code: 'GEOCODING_SERVICE_ERROR',
+                message: 'Geocoding service is currently unavailable',
+            });
         }
     }
 }

@@ -121,6 +121,9 @@ export class HttpExceptionFilter
             case HttpStatus.UNAUTHORIZED:
                 return 'UNAUTHORIZED';
 
+            case HttpStatus.BAD_GATEWAY:
+                return 'BAD_GATEWAY';
+
             case HttpStatus.FORBIDDEN:
                 return 'FORBIDDEN';
 
