@@ -4,7 +4,7 @@ import {ConfigService} from "@nestjs/config";
 import {RoutingResult} from "./types/routing-result";
 import {firstValueFrom} from "rxjs";
 import {OrsDirectionsResponse} from "./types/ors-directions-response";
-import {AxiosError} from "axios";
+import {AxiosError, AxiosResponse} from "axios";
 
 @Injectable()
 export class RoutingService {
@@ -19,10 +19,12 @@ export class RoutingService {
     async buildRoute(
         coordinates: [number, number][],
     ): Promise<RoutingResult> {
-        try {
-            const apiKey = this.configService.getOrThrow<string>('ORS_API_KEY');
 
-            const response = await firstValueFrom(
+        const apiKey = this.configService.getOrThrow<string>('ORS_API_KEY');
+        let response: AxiosResponse<OrsDirectionsResponse>;
+
+        try {
+            response = await firstValueFrom(
                 this.httpService.post<OrsDirectionsResponse>(
                     'https://api.heigit.org/openrouteservice/v2/directions/driving-car/geojson',
                     {
@@ -38,28 +40,7 @@ export class RoutingService {
                 )
             )
 
-            const feature = response.data.features[0]
-
-            if (!feature) {
-                this.logger.error('Routing service returned no route');
-
-                throw new BadGatewayException({
-                    code: 'ROUTING_ROUTE_NOT_FOUND',
-                    message: 'Routing service returned no route',
-                });
-            }
-
-            return {
-                distanceMeters: feature.properties.summary.distance,
-                durationSeconds: feature.properties.summary.duration,
-                geometry: feature.geometry
-            }
         } catch (error) {
-
-            if (error instanceof BadGatewayException) {
-                throw error;
-            }
-
             if (error instanceof AxiosError) {
                 this.logger.error(
                     `Routing request failed: status=${error.response?.status}, message=${error.message}`,
@@ -77,6 +58,23 @@ export class RoutingService {
                 code: 'ROUTING_SERVICE_ERROR',
                 message: 'Routing service is currently unavailable',
             });
+        }
+
+        const feature = response.data.features[0]
+
+        if (!feature) {
+            this.logger.error('Routing service returned no route');
+
+            throw new BadGatewayException({
+                code: 'ROUTING_ROUTE_NOT_FOUND',
+                message: 'Routing service returned no route',
+            });
+        }
+
+        return {
+            distanceMeters: feature.properties.summary.distance,
+            durationSeconds: feature.properties.summary.duration,
+            geometry: feature.geometry
         }
     }
 }

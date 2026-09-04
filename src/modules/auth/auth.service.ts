@@ -23,18 +23,18 @@ export class AuthService {
 
     async register(dto: RegisterDto): Promise<CurrentUserResponseDto> {
         const email = dto.email.trim().toLowerCase();
+        const existingUser = await this.usersService.findByEmail(email);
+
+        if (existingUser) {
+            throw new ConflictException({
+                code: 'EMAIL_ALREADY_EXISTS',
+                message: 'User with this email already exists',
+            });
+        }
+
+        const passwordHash = await bcrypt.hash(dto.password, 10);
 
         try {
-            const existingUser = await this.usersService.findByEmail(email);
-
-            if (existingUser) {
-                throw new ConflictException(
-                    'User with this email already exists',
-                );
-            }
-
-            const passwordHash = await bcrypt.hash(dto.password, 10);
-
             const user = await this.usersService.create({
                 name: dto.name,
                 email,
@@ -48,9 +48,10 @@ export class AuthService {
                 error instanceof Prisma.PrismaClientKnownRequestError &&
                 error.code === 'P2002'
             ) {
-                throw new ConflictException(
-                    'User with this email already exists',
-                );
+                throw new ConflictException({
+                    code: 'EMAIL_ALREADY_EXISTS',
+                    message: 'User with this email already exists',
+                });
             }
 
             throw error;
@@ -65,13 +66,19 @@ export class AuthService {
         const user = await this.usersService.findByEmail(email);
 
         if (!user) {
-            throw new UnauthorizedException('Invalid email or password');
+            throw new UnauthorizedException({
+                code: 'INVALID_CREDENTIALS',
+                message: 'Invalid email or password',
+            });
         }
 
         const passwordMatches = await bcrypt.compare(dto.password, user.passwordHash)
 
         if (!passwordMatches) {
-            throw new UnauthorizedException('Invalid email or password');
+            throw new UnauthorizedException({
+                code: 'INVALID_CREDENTIALS',
+                message: 'Invalid email or password',
+            });
         }
 
         const [accessToken, refreshToken] = await Promise.all([
@@ -117,36 +124,39 @@ export class AuthService {
     }
 
     async refresh(refreshToken: string): Promise<string> {
+        let payload: JwtPayload;
+
         try {
-            const payload =
-                await this.jwtService.verifyAsync<JwtPayload>(
-                    refreshToken,
-                    {
-                        secret:
-                            this.configService.getOrThrow<string>(
-                                'JWT_REFRESH_SECRET',
-                            ),
-                    },
-                );
-
-            const user = await this.usersService.findByEmail(
-                payload.email,
-            );
-
-            if (!user || user.id !== payload.sub) {
-                throw new UnauthorizedException(
-                    'Invalid refresh token',
-                );
-            }
-
-            return this.createAccessToken(
-                payload.sub,
-                payload.email,
+            payload = await this.jwtService.verifyAsync<JwtPayload>(
+                refreshToken,
+                {
+                    secret:
+                        this.configService.getOrThrow<string>(
+                            'JWT_REFRESH_SECRET',
+                        ),
+                },
             );
         } catch {
-            throw new UnauthorizedException(
-                'Invalid refresh token',
-            );
+            throw new UnauthorizedException({
+                code: 'INVALID_REFRESH_TOKEN',
+                message: 'Invalid refresh token',
+            });
         }
+
+        const user = await this.usersService.findByEmail(
+            payload.email,
+        );
+
+        if (!user || user.id !== payload.sub) {
+            throw new UnauthorizedException({
+                code: 'INVALID_REFRESH_TOKEN',
+                message: 'Invalid refresh token',
+            });
+        }
+
+        return this.createAccessToken(
+            payload.sub,
+            payload.email,
+        );
     }
 }
