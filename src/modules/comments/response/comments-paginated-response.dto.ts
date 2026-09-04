@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { CommentResponseDto } from './comment-response.dto';
+import { PaginationMetaDto } from '../../../common/pagination/response/pagination-meta.dto';
 
 export class CommentsPaginatedResponseDto {
     @ApiProperty({
@@ -8,17 +9,7 @@ export class CommentsPaginatedResponseDto {
     items: CommentResponseDto[];
 
     @ApiProperty({
-        example: 43,
+        type: PaginationMetaDto,
     })
-    total: number;
-
-    @ApiProperty({
-        example: 1,
-    })
-    page: number;
-
-    @ApiProperty({
-        example: 20,
-    })
-    limit: number;
+    meta: PaginationMetaDto;
 }

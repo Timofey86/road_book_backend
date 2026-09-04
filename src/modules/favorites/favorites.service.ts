@@ -73,7 +73,7 @@ export class FavoritesService {
 
         const skip = (query.page - 1) * query.limit;
 
-        const [favorites, total] = await Promise.all([
+        const [favorites, totalItems] = await Promise.all([
             this.favoritesRepository.findAllByUser(
                 currentUserId,
                 skip,
@@ -92,10 +92,14 @@ export class FavoritesService {
                     ),
                 ),
             ),
-            total,
-            page: query.page,
-            limit: query.limit,
+            meta: {
+                page: query.page,
+                limit: query.limit,
+                totalItems,
+                totalPages: Math.ceil(
+                    totalItems / query.limit,
+                ),
+            },
         };
-
     }
 }

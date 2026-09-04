@@ -47,7 +47,7 @@ export class CommentsService {
 
         const skip = (query.page - 1) * query.limit;
 
-        const [comments, total] = await Promise.all([
+        const [comments, totalItems] = await Promise.all([
             this.commentsRepository.findAllByRoute(
                 routeId,
                 skip,
@@ -58,9 +58,12 @@ export class CommentsService {
 
         return {
             items: await this.commentsMapper.mapMany(comments),
-            total,
-            page: query.page,
-            limit: query.limit,
+            meta: {
+                page: query.page,
+                limit: query.limit,
+                totalItems,
+                totalPages: Math.ceil(totalItems / query.limit),
+            },
         };
     }
 
