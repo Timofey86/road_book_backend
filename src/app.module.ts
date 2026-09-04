@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import {MiddlewareConsumer, Module} from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import {PrismaModule} from "./prisma/prisma.module";
@@ -16,6 +16,7 @@ import { RoutePhotosModule } from './modules/route-photos/route-photos.module';
 import { CommentsModule } from './modules/comments/comments.module';
 import { LikesModule } from './modules/likes/likes.module';
 import { FavoritesModule } from './modules/favorites/favorites.module';
+import {RequestIdMiddleware} from "./common/middleware/request-id.middleware";
 
 @Module({
   imports: [
@@ -40,4 +41,12 @@ import { FavoritesModule } from './modules/favorites/favorites.module';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule {
+    configure(
+        consumer: MiddlewareConsumer,
+    ): void {
+        consumer
+            .apply(RequestIdMiddleware)
+            .forRoutes('*');
+    }
+}
