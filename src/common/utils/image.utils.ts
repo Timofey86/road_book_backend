@@ -28,6 +28,8 @@ export function getImageExtension(
             return 'webp';
 
         default:
-            throw new BadRequestException('Unsupported image type');
+            throw new BadRequestException({
+                code: 'UNSUPPORTED_IMAGE_TYPE'
+            });
     }
 }

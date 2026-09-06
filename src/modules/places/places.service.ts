@@ -70,8 +70,7 @@ export class PlacesService {
             }
 
             throw new BadGatewayException({
-                code: 'GEOCODING_SERVICE_ERROR',
-                message: 'Geocoding service is currently unavailable',
+                code: 'GEOCODING_SERVICE_ERROR'
             });
         }
     }

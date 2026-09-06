@@ -1,0 +1,58 @@
+{
+  "BAD_REQUEST": "Некорректный запрос",
+  "UNAUTHORIZED": "Необходима авторизация",
+  "FORBIDDEN": "Доступ запрещён",
+  "NOT_FOUND": "Ресурс не найден",
+  "CONFLICT": "Конфликт данных",
+  "BAD_GATEWAY": "Ошибка внешнего сервиса",
+  "INTERNAL_SERVER_ERROR": "Внутренняя ошибка сервера",
+
+  "VALIDATION_ERROR": "Некорректные входные данные",
+
+  "EMAIL_ALREADY_EXISTS": "Пользователь с таким email уже существует",
+  "INVALID_CREDENTIALS": "Неверный email или пароль",
+  "INVALID_REFRESH_TOKEN": "Недействительный refresh token",
+  "REFRESH_TOKEN_MISSING": "Refresh token отсутствует",
+
+  "USER_NOT_FOUND": "Пользователь не найден",
+  "USER_AVATAR_REQUIRED": "Необходимо загрузить файл аватара",
+
+  "ROUTE_NOT_FOUND": "Маршрут не найден",
+  "ROUTE_FORBIDDEN": "Вы не можете изменять этот маршрут",
+  "ROUTE_DELETE_FORBIDDEN": "Вы не можете удалить этот маршрут",
+  "ROUTE_BUILD_FORBIDDEN": "Вы не можете построить этот маршрут",
+
+  "ROUTE_STOP_NOT_FOUND": "Остановка маршрута не найдена",
+  "ROUTE_STOP_FORBIDDEN": "Вы не можете изменять остановки этого маршрута",
+  "ROUTE_STOPS_REQUIRED": "Для построения маршрута необходимо минимум две остановки",
+  "ROUTE_STOP_ADD_FORBIDDEN": "Вы не можете добавлять остановки в этот маршрут",
+  "ROUTE_STOP_DELETE_FORBIDDEN": "Вы не можете удалять остановки из этого маршрута",
+  "ROUTE_STOP_REORDER_FORBIDDEN": "Вы не можете изменять порядок остановок этого маршрута",
+  "ROUTE_STOP_ALL_REQUIRED": "Необходимо передать все идентификаторы остановок маршрута",
+  "ROUTE_STOP_UNIQUE": "Идентификаторы остановок маршрута должны быть уникальными",
+  "ROUTE_STOP_POSITION": "Позиции остановок должны быть уникальными",
+  "ROUTE_STOP_POSITION_START": "Позиции должны начинаться с 1 и идти последовательно",
+
+  "ROUTE_PHOTO_NOT_FOUND": "Фотография маршрута не найдена",
+  "ROUTE_PHOTO_ADD_FORBIDDEN": "Вы не можете добавлять фотографии к этому маршруту",
+  "ROUTE_PHOTO_UPDATE_FORBIDDEN": "Вы не можете изменять фотографии этого маршрута",
+  "ROUTE_PHOTO_DELETE_FORBIDDEN": "Вы не можете удалять фотографии этого маршрута",
+  "ROUTE_PHOTO_REORDER_FORBIDDEN": "Вы не можете изменять порядок фотографий этого маршрута",
+  "ROUTE_PHOTO_REQUIRED": "Необходимо загрузить файл фотографии",
+  "ROUTE_PHOTO_LIMIT_EXCEEDED": "Маршрут может содержать не более {maxPhotos} фотографий",
+  "ROUTE_PHOTO_ALL_IDS_REQUIRED": "Необходимо передать все идентификаторы фотографий маршрута",
+  "ROUTE_PHOTO_INVALID": "Некорректный идентификатор фотографии маршрута",
+  "ROUTE_PHOTO_UNIQUE": "Идентификаторы фотографий маршрута должны быть уникальными",
+
+  "COMMENT_NOT_FOUND": "Комментарий не найден",
+  "COMMENT_UPDATE_FORBIDDEN": "Вы не можете изменить этот комментарий",
+  "COMMENT_DELETE_FORBIDDEN": "Вы не можете удалить этот комментарий",
+
+  "COVER_IMAGE_REQUIRED": "Необходимо загрузить обложку маршрута",
+  "UNSUPPORTED_IMAGE_TYPE": "Неподдерживаемый тип изображения",
+  "ALLOWED_IMAGE_TYPES": "Разрешены только изображения JPEG, PNG и WebP",
+
+  "ROUTING_SERVICE_ERROR": "Сервис построения маршрутов временно недоступен",
+  "ROUTING_ROUTE_NOT_FOUND": "Не удалось построить маршрут",
+  "GEOCODING_SERVICE_ERROR": "Сервис поиска мест временно недоступен"
+}

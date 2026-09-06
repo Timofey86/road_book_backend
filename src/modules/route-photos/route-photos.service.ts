@@ -28,24 +28,35 @@ export class RoutePhotosService {
     ): Promise<RoutePhotoResponseDto> {
 
         if (!file) {
-            throw new BadRequestException('Photo is required');
+            throw new BadRequestException({
+                code: 'ROUTE_PHOTO_REQUIRED'
+            });
         }
 
         const route = await this.routePhotosRepository
             .findRouteForOwnership(routeId);
 
         if (!route) {
-            throw new NotFoundException('Route not found');
+            throw new NotFoundException({
+                code: 'ROUTE_NOT_FOUND'
+            });
         }
 
         if (route.userId !== currentUserId) {
-            throw new ForbiddenException('You cannot add photos to this route');
+            throw new ForbiddenException({
+                code: 'ROUTE_PHOTO_ADD_FORBIDDEN'
+            });
         }
 
         const photosCount = await this.routePhotosRepository.countByRoute(routeId);
 
         if (photosCount >= this.maxPhotosPerRoute) {
-            throw new BadRequestException(`Route can contain no more than ${this.maxPhotosPerRoute} photos`);
+            throw new BadRequestException({
+                code: 'ROUTE_PHOTO_LIMIT_EXCEEDED',
+                args: {
+                    maxPhotos: this.maxPhotosPerRoute,
+                },
+            });
         }
 
         const lastPhoto = await this.routePhotosRepository.findLastPosition(routeId);
@@ -85,17 +96,23 @@ export class RoutePhotosService {
         const route = await this.routePhotosRepository.findRouteForOwnership(routeId);
 
         if (!route) {
-            throw new NotFoundException('Route not found');
+            throw new NotFoundException({
+                code: 'ROUTE_NOT_FOUND',
+            });
         }
 
         if (route.userId !== currentUserId) {
-            throw new ForbiddenException('You cannot delete photos from this route');
+            throw new ForbiddenException({
+                code: 'ROUTE_PHOTO_DELETE_FORBIDDEN'
+            });
         }
 
         const photo = await this.routePhotosRepository.findById(routeId, photoId);
 
         if (!photo) {
-            throw new NotFoundException('Photo not found');
+            throw new NotFoundException({
+                code: 'ROUTE_PHOTO_NOT_FOUND'
+            });
         }
 
         await this.routePhotosRepository.deleteAndShiftPositions(
@@ -119,11 +136,15 @@ export class RoutePhotosService {
             await this.routePhotosRepository.findRouteForOwnership(routeId);
 
         if (!route) {
-            throw new NotFoundException('Route not found');
+            throw new NotFoundException({
+                code: 'ROUTE_NOT_FOUND'
+            });
         }
 
         if (route.userId !== currentUserId) {
-            throw new ForbiddenException('You cannot update photos in this route');
+            throw new ForbiddenException({
+                code: 'ROUTE_PHOTO_UPDATE_FORBIDDEN'
+            });
         }
 
         const photo =
@@ -133,7 +154,9 @@ export class RoutePhotosService {
             );
 
         if (!photo) {
-            throw new NotFoundException('Photo not found');
+            throw new NotFoundException({
+                code: 'ROUTE_PHOTO_NOT_FOUND'
+            });
         }
 
         const caption = dto.caption === null
@@ -158,18 +181,24 @@ export class RoutePhotosService {
             .findRouteForOwnership(routeId);
 
         if (!route) {
-            throw new NotFoundException('Route not found');
+            throw new NotFoundException({
+                code: 'ROUTE_NOT_FOUND'
+            });
         }
 
         if (route.userId !== currentUserId) {
-            throw new ForbiddenException('You cannot update photos in this route');
+            throw new ForbiddenException({
+                code: 'ROUTE_PHOTO_REORDER_FORBIDDEN'
+            });
         }
 
         const photos = await this.routePhotosRepository
             .findAllByRoute(routeId);
 
         if (photos.length !== dto.photoIds.length) {
-            throw new BadRequestException('All route photo IDs must be provided');
+            throw new BadRequestException({
+                code: 'ROUTE_PHOTO_ALL_IDS_REQUIRED'
+            });
         }
 
         const existingIds = new Set(photos.map((photo) => photo.id));
@@ -178,13 +207,17 @@ export class RoutePhotosService {
             );
 
         if (hasUnknownPhoto) {
-            throw new BadRequestException('Invalid route photo ID');
+            throw new BadRequestException({
+                code: 'ROUTE_PHOTO_INVALID'
+            });
         }
 
         const uniqueIds = new Set(dto.photoIds);
 
         if (uniqueIds.size !== dto.photoIds.length) {
-            throw new BadRequestException('Photo IDs must be unique');
+            throw new BadRequestException({
+                code: 'ROUTE_PHOTO_UNIQUE'
+            });
         }
 
         await this.routePhotosRepository.reorder(

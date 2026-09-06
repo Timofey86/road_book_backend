@@ -20,7 +20,9 @@ export class FavoritesService {
         const route = await this.favoritesRepository.findRoute(routeId);
 
         if (!route) {
-            throw new NotFoundException('Route not found');
+            throw new NotFoundException({
+                code: 'ROUTE_NOT_FOUND'
+            });
         }
 
         const existingFavorite = await this.favoritesRepository.find(
@@ -45,7 +47,9 @@ export class FavoritesService {
         const route = await this.favoritesRepository.findRoute(routeId);
 
         if (!route) {
-            throw new NotFoundException('Route not found');
+            throw new NotFoundException({
+                code: 'ROUTE_NOT_FOUND'
+            });
         }
 
         const existingFavorite = await this.favoritesRepository.find(

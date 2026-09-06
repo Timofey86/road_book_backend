@@ -23,7 +23,9 @@ export class CommentsService {
         const route = await this.commentsRepository.findRoute(routeId);
 
         if (!route) {
-            throw new NotFoundException('Route not found');
+            throw new NotFoundException({
+                code: 'ROUTE_NOT_FOUND'
+            });
         }
 
         const comment = await this.commentsRepository.create(
@@ -42,7 +44,9 @@ export class CommentsService {
         const route = await this.commentsRepository.findRoute(routeId);
 
         if (!route) {
-            throw new NotFoundException('Route not found');
+            throw new NotFoundException({
+                code: 'ROUTE_NOT_FOUND'
+            });
         }
 
         const skip = (query.page - 1) * query.limit;
@@ -75,11 +79,15 @@ export class CommentsService {
         const comment = await this.commentsRepository.findById(commentId);
 
         if (!comment) {
-            throw new NotFoundException('Comment not found');
+            throw new NotFoundException({
+                code: 'COMMENT_NOT_FOUND'
+            });
         }
 
         if (comment.userId !== currentUserId) {
-            throw new ForbiddenException('You cannot update this comment');
+            throw new ForbiddenException({
+                code: 'COMMENT_UPDATE_FORBIDDEN'
+            });
         }
 
         const updatedComment = await this.commentsRepository.update(
@@ -97,11 +105,15 @@ export class CommentsService {
         const comment = await this.commentsRepository.findById(commentId);
 
         if (!comment) {
-            throw new NotFoundException('Comment not found');
+            throw new NotFoundException({
+                code: 'COMMENT_NOT_FOUND'
+            });
         }
 
         if (comment.userId !== currentUserId) {
-            throw new ForbiddenException('You cannot delete this comment');
+            throw new ForbiddenException({
+                code: 'COMMENT_DELETE_FORBIDDEN'
+            });
         }
 
         await this.commentsRepository.delete(commentId);

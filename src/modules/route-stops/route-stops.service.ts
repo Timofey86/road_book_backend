@@ -27,13 +27,15 @@ export class RouteStopsService {
         })
 
         if (!route) {
-            throw new NotFoundException('route not found');
+            throw new NotFoundException({
+                code: 'ROUTE_NOT_FOUND'
+            });
         }
 
         if (route.userId !== currentUserId) {
-            throw new ForbiddenException(
-                'You cannot modify this route',
-            );
+            throw new ForbiddenException({
+                code: 'ROUTE_STOP_ADD_FORBIDDEN'
+            });
         }
 
         const stop = await this.prismaService.$transaction(
@@ -92,13 +94,15 @@ export class RouteStopsService {
         })
 
         if (!route) {
-            throw new NotFoundException('Route not found');
+            throw new NotFoundException({
+                code: 'ROUTE_NOT_FOUND'
+            });
         }
 
         if (route.userId !== currentUserId) {
-            throw new ForbiddenException(
-                'You cannot modify this route',
-            );
+            throw new ForbiddenException({
+                code: 'ROUTE_STOP_FORBIDDEN'
+            });
         }
 
         const stop = await this.prismaService.routeStop.findFirst({
@@ -109,7 +113,9 @@ export class RouteStopsService {
         });
 
         if (!stop) {
-            throw new NotFoundException('Route stop not found');
+            throw new NotFoundException({
+                code: 'ROUTE_STOP_NOT_FOUND'
+            });
         }
 
         const coordinatesChanged =
@@ -168,13 +174,15 @@ export class RouteStopsService {
         })
 
         if (!route) {
-            throw new NotFoundException('Route not found');
+            throw new NotFoundException({
+                code: 'ROUTE_NOT_FOUND'
+            });
         }
 
         if (route.userId !== currentUserId) {
-            throw new ForbiddenException(
-                'You cannot modify this route',
-            );
+            throw new ForbiddenException({
+                code: 'ROUTE_STOP_DELETE_FORBIDDEN'
+            });
         }
 
         const stop = await this.prismaService.routeStop.findFirst({
@@ -185,7 +193,9 @@ export class RouteStopsService {
         })
 
         if (!stop) {
-            throw new NotFoundException('Route stop not found');
+            throw new NotFoundException({
+                code: 'ROUTE_STOP_NOT_FOUND'
+            });
         }
 
         await this.prismaService.$transaction(async tx => {
@@ -236,13 +246,15 @@ export class RouteStopsService {
         })
 
         if (!route) {
-            throw new NotFoundException('Route not found');
+            throw new NotFoundException({
+                code: 'ROUTE_NOT_FOUND'
+            });
         }
 
         if (route.userId !== currentUserId) {
-            throw new ForbiddenException(
-                'You cannot modify this route',
-            );
+            throw new ForbiddenException({
+                code: 'ROUTE_STOP_REORDER_FORBIDDEN'
+            });
         }
 
         const existingStops =
@@ -256,9 +268,9 @@ export class RouteStopsService {
             });
 
         if (dto.stops.length !== existingStops.length) {
-            throw new BadRequestException(
-                'All route stops must be provided',
-            );
+            throw new BadRequestException({
+                code: 'ROUTE_STOP_ALL_REQUIRED'
+            });
         }
 
         const existingIds = new Set(
@@ -272,16 +284,21 @@ export class RouteStopsService {
         const uniqueRequestedIds = new Set(requestedIds);
 
         if (uniqueRequestedIds.size !== requestedIds.length) {
-            throw new BadRequestException(
-                'Route stop ids must be unique',
-            );
+            throw new BadRequestException({
+                code: 'ROUTE_STOP_UNIQUE'
+            });
         }
 
         for (const item of dto.stops) {
             if (!existingIds.has(item.id)) {
-                throw new NotFoundException(
-                    `Route stop ${item.id} not found`,
-                );
+                throw new NotFoundException({
+                    code: 'ROUTE_STOP_NOT_FOUND',
+                    details: [
+                        {
+                            stopId: item.id,
+                        },
+                    ],
+                });
             }
         }
 
@@ -292,9 +309,9 @@ export class RouteStopsService {
         const uniquePositions = new Set(positions);
 
         if (uniquePositions.size !== positions.length) {
-            throw new BadRequestException(
-                'Positions must be unique',
-            );
+            throw new BadRequestException({
+                code: 'ROUTE_STOP_POSITION'
+            });
         }
         const sortedPositions = [...positions,]
             .sort((a, b) => a - b);
@@ -305,9 +322,9 @@ export class RouteStopsService {
             );
 
         if (!positionsAreSequential) {
-            throw new BadRequestException(
-                'Positions must start from 1 and be sequential',
-            );
+            throw new BadRequestException({
+                code: 'ROUTE_STOP_POSITION_START'
+            });
         }
 
         await this.prismaService.$transaction(

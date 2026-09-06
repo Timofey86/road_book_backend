@@ -1,0 +1,58 @@
+{
+  "BAD_REQUEST": "Bad request",
+  "UNAUTHORIZED": "Unauthorized",
+  "FORBIDDEN": "Forbidden",
+  "NOT_FOUND": "Resource not found",
+  "CONFLICT": "Conflict",
+  "BAD_GATEWAY": "External service error",
+  "INTERNAL_SERVER_ERROR": "Internal server error",
+
+  "VALIDATION_ERROR": "Invalid input data",
+
+  "EMAIL_ALREADY_EXISTS": "User with this email already exists",
+  "INVALID_CREDENTIALS": "Invalid email or password",
+  "INVALID_REFRESH_TOKEN": "Invalid refresh token",
+  "REFRESH_TOKEN_MISSING": "Refresh token is missing",
+
+  "USER_NOT_FOUND": "User not found",
+  "USER_AVATAR_REQUIRED": "Avatar file is required",
+
+  "ROUTE_NOT_FOUND": "Route not found",
+  "ROUTE_FORBIDDEN": "You cannot modify this route",
+  "ROUTE_DELETE_FORBIDDEN": "You cannot delete this route",
+  "ROUTE_BUILD_FORBIDDEN": "You cannot build this route",
+
+  "ROUTE_STOP_NOT_FOUND": "Route stop not found",
+  "ROUTE_STOP_FORBIDDEN": "You cannot modify stops for this route",
+  "ROUTE_STOPS_REQUIRED": "At least two route stops are required",
+  "ROUTE_STOP_ADD_FORBIDDEN": "You cannot add stops to this route",
+  "ROUTE_STOP_DELETE_FORBIDDEN": "You cannot delete stops from this route",
+  "ROUTE_STOP_REORDER_FORBIDDEN": "You cannot reorder stops in this route",
+  "ROUTE_STOP_ALL_REQUIRED": "All route stop IDs must be provided",
+  "ROUTE_STOP_UNIQUE": "Route stop IDs must be unique",
+  "ROUTE_STOP_POSITION": "Positions must be unique",
+  "ROUTE_STOP_POSITION_START": "Positions must start from 1 and be sequential",
+
+  "ROUTE_PHOTO_NOT_FOUND": "Route photo not found",
+  "ROUTE_PHOTO_ADD_FORBIDDEN": "You cannot add photos to this route",
+  "ROUTE_PHOTO_UPDATE_FORBIDDEN": "You cannot update photos in this route",
+  "ROUTE_PHOTO_DELETE_FORBIDDEN": "You cannot delete photos from this route",
+  "ROUTE_PHOTO_REORDER_FORBIDDEN": "You cannot reorder photos in this route",
+  "ROUTE_PHOTO_REQUIRED": "Photo file is required",
+  "ROUTE_PHOTO_LIMIT_EXCEEDED": "Route can contain no more than {maxPhotos} photos",
+  "ROUTE_PHOTO_ALL_IDS_REQUIRED": "All route photo IDs must be provided",
+  "ROUTE_PHOTO_INVALID": "Invalid route photo ID",
+  "ROUTE_PHOTO_UNIQUE": "Route photo IDs must be unique",
+
+  "COMMENT_NOT_FOUND": "Comment not found",
+  "COMMENT_UPDATE_FORBIDDEN": "You cannot update this comment",
+  "COMMENT_DELETE_FORBIDDEN": "You cannot delete this comment",
+
+  "COVER_IMAGE_REQUIRED": "Cover image is required",
+  "UNSUPPORTED_IMAGE_TYPE": "Unsupported image type",
+  "ALLOWED_IMAGE_TYPES": "Only JPEG, PNG and WebP images are allowed",
+
+  "ROUTING_SERVICE_ERROR": "Routing service is currently unavailable",
+  "ROUTING_ROUTE_NOT_FOUND": "Routing service returned no route",
+  "GEOCODING_SERVICE_ERROR": "Geocoding service is currently unavailable"
+}

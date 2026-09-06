@@ -207,9 +207,9 @@ export class RoutesController {
             fileFilter: (_req, file, callback) => {
                 if (!isAllowedImageMimeType(file.mimetype)) {
                     return callback(
-                        new BadRequestException(
-                            'Only JPEG, PNG and WebP images are allowed',
-                        ),
+                        new BadRequestException({
+                            code: 'ALLOWED_IMAGE_TYPES'
+                        }),
                         false,
                     );
                 }

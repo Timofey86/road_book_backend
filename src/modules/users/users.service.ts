@@ -60,7 +60,9 @@ export class UsersService {
         ]);
 
         if (!user) {
-            throw new NotFoundException('User not found');
+            throw new NotFoundException({
+                code: 'USER_NOT_FOUND'
+            });
         }
 
         return this.userMapper.mapCurrentUser(
@@ -78,7 +80,9 @@ export class UsersService {
         ]);
 
         if (!user) {
-            throw new NotFoundException('User not found');
+            throw new NotFoundException({
+                code: 'USER_NOT_FOUND'
+            });
         }
 
         return this.userMapper.mapPublicUser(
@@ -103,7 +107,9 @@ export class UsersService {
         file: Express.Multer.File,
     ): Promise<CurrentUserResponseDto> {
         if (!file) {
-            throw new BadRequestException('Avatar file is required');
+            throw new BadRequestException({
+                code: 'USER_AVATAR_REQUIRED'
+            });
         }
 
         const extensionMap: Record<string, string> = {
@@ -115,13 +121,17 @@ export class UsersService {
         const extension = extensionMap[file.mimetype];
 
         if (!extension) {
-            throw new BadRequestException('Unsupported image type');
+            throw new BadRequestException({
+                code: 'UNSUPPORTED_IMAGE_TYPE'
+            });
         }
 
         const user = await this.usersRepository.findAvatar(userId);
 
         if (!user) {
-            throw new NotFoundException('User not found');
+            throw new NotFoundException({
+                code: 'USER_NOT_FOUND'
+            });
         }
 
         const oldObjectKey = user.avatarObjectKey;
@@ -157,7 +167,9 @@ export class UsersService {
         const user = await this.usersRepository.findAvatar(userId);
 
         if (!user) {
-            throw new NotFoundException('User not found');
+            throw new NotFoundException({
+                code: 'USER_NOT_FOUND'
+            });
         }
 
         const oldObjectKey = user.avatarObjectKey;
@@ -175,7 +187,9 @@ export class UsersService {
         const user = await this.usersRepository.findForDelete(userId);
 
         if (!user) {
-            throw new NotFoundException('User not found');
+            throw new NotFoundException({
+                code: 'USER_NOT_FOUND'
+            });
         }
 
         const objectKeys: string[] = [];
@@ -207,7 +221,9 @@ export class UsersService {
         const user = await this.usersRepository.findById(userId);
 
         if (!user) {
-            throw new NotFoundException('User not found');
+            throw new NotFoundException({
+                code: 'USER_NOT_FOUND'
+            });
         }
     }
 

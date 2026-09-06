@@ -27,8 +27,7 @@ export class AuthService {
 
         if (existingUser) {
             throw new ConflictException({
-                code: 'EMAIL_ALREADY_EXISTS',
-                message: 'User with this email already exists',
+                code: 'EMAIL_ALREADY_EXISTS'
             });
         }
 
@@ -49,8 +48,7 @@ export class AuthService {
                 error.code === 'P2002'
             ) {
                 throw new ConflictException({
-                    code: 'EMAIL_ALREADY_EXISTS',
-                    message: 'User with this email already exists',
+                    code: 'EMAIL_ALREADY_EXISTS'
                 });
             }
 
@@ -67,8 +65,7 @@ export class AuthService {
 
         if (!user) {
             throw new UnauthorizedException({
-                code: 'INVALID_CREDENTIALS',
-                message: 'Invalid email or password',
+                code: 'INVALID_CREDENTIALS'
             });
         }
 
@@ -76,8 +73,7 @@ export class AuthService {
 
         if (!passwordMatches) {
             throw new UnauthorizedException({
-                code: 'INVALID_CREDENTIALS',
-                message: 'Invalid email or password',
+                code: 'INVALID_CREDENTIALS'
             });
         }
 
@@ -138,8 +134,7 @@ export class AuthService {
             );
         } catch {
             throw new UnauthorizedException({
-                code: 'INVALID_REFRESH_TOKEN',
-                message: 'Invalid refresh token',
+                code: 'INVALID_REFRESH_TOKEN'
             });
         }
 
@@ -149,8 +144,7 @@ export class AuthService {
 
         if (!user || user.id !== payload.sub) {
             throw new UnauthorizedException({
-                code: 'INVALID_REFRESH_TOKEN',
-                message: 'Invalid refresh token',
+                code: 'INVALID_REFRESH_TOKEN'
             });
         }
 

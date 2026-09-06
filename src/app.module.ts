@@ -1,4 +1,4 @@
-import {MiddlewareConsumer, Module} from '@nestjs/common';
+import {MiddlewareConsumer, Module, RequestMethod} from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import {PrismaModule} from "./prisma/prisma.module";
@@ -17,6 +17,10 @@ import { CommentsModule } from './modules/comments/comments.module';
 import { LikesModule } from './modules/likes/likes.module';
 import { FavoritesModule } from './modules/favorites/favorites.module';
 import {RequestIdMiddleware} from "./common/middleware/request-id.middleware";
+import {AcceptLanguageResolver, I18nModule} from "nestjs-i18n";
+import { join } from 'path';
+import {APP_FILTER} from "@nestjs/core";
+import {HttpExceptionFilter} from "./common/filters/http-exception.filter";
 
 @Module({
   imports: [
@@ -36,17 +40,32 @@ import {RequestIdMiddleware} from "./common/middleware/request-id.middleware";
       RoutePhotosModule,
       CommentsModule,
       LikesModule,
-      FavoritesModule
+      FavoritesModule,
+      I18nModule.forRoot({
+          fallbackLanguage: 'en',
+          loaderOptions: {
+              path: join(__dirname, '..', 'i18n'),
+              watch: true,
+          },
+          resolvers: [
+              AcceptLanguageResolver,
+          ],
+      }),
+
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, {
+      provide: APP_FILTER,
+      useClass: HttpExceptionFilter,
+  },],
 })
 export class AppModule {
-    configure(
-        consumer: MiddlewareConsumer,
-    ): void {
+    configure(consumer: MiddlewareConsumer): void {
         consumer
             .apply(RequestIdMiddleware)
-            .forRoutes('*');
+            .forRoutes({
+                path: '{*path}',
+                method: RequestMethod.ALL,
+            });
     }
 }

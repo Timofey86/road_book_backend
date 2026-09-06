@@ -76,9 +76,9 @@ export class RoutesService {
                 );
 
         if (!route) {
-            throw new NotFoundException(
-                'Route not found',
-            );
+            throw new NotFoundException({
+                code: 'ROUTE_NOT_FOUND'
+            });
         }
 
         return this.routeMapper
@@ -89,11 +89,15 @@ export class RoutesService {
         const route = await this.routesRepository.findForOwnership(routeId);
 
         if (!route) {
-            throw new NotFoundException('Route not found');
+            throw new NotFoundException({
+                code: 'ROUTE_NOT_FOUND'
+            });
         }
 
         if (route.userId !== currentUserId) {
-            throw new ForbiddenException('You cannot edit this route');
+            throw new ForbiddenException({
+                code: 'ROUTE_FORBIDDEN'
+            });
         }
 
         const title = dto.title?.trim();
@@ -121,11 +125,15 @@ export class RoutesService {
         const route = await this.routesRepository.findForDelete(routeId);
 
         if (!route) {
-            throw new NotFoundException('Route not found');
+            throw new NotFoundException({
+                code: 'ROUTE_NOT_FOUND'
+            });
         }
 
         if (route.userId !== currentUserId) {
-            throw new ForbiddenException('You cannot delete this route');
+            throw new ForbiddenException({
+                code: 'ROUTE_DELETE_FORBIDDEN'
+            });
         }
 
         const objectKeys = [
@@ -162,19 +170,21 @@ export class RoutesService {
         const route = await this.routesRepository.findForBuild(routeId);
 
         if (!route) {
-            throw new NotFoundException('Route not found');
+            throw new NotFoundException({
+                code: 'ROUTE_NOT_FOUND'
+            });
         }
 
         if (route.userId !== userId) {
-            throw new ForbiddenException(
-                'You are not allowed to build this route',
-            );
+            throw new ForbiddenException({
+                code: 'ROUTE_BUILD_FORBIDDEN'
+            });
         }
 
         if (route.stops.length < 2) {
-            throw new BadRequestException(
-                'Route must contain at least 2 stops',
-            );
+            throw new BadRequestException({
+                code: 'ROUTE_STOPS_REQUIRED'
+            });
         }
 
         const coordinates: [number, number][] =
@@ -240,11 +250,15 @@ export class RoutesService {
         const route = await this.routesRepository.findForOwnership(routeId);
 
         if (!route) {
-            throw new NotFoundException('Route not found');
+            throw new NotFoundException({
+                code: 'ROUTE_NOT_FOUND'
+            });
         }
 
         if (route.userId !== currentUserId) {
-            throw new ForbiddenException('You cannot edit this route');
+            throw new ForbiddenException({
+                code: 'ROUTE_FORBIDDEN'
+            });
         }
 
         const tags = this.tagsService.normalizeTags(dto.tags);
@@ -261,17 +275,23 @@ export class RoutesService {
         file: Express.Multer.File,
     ): Promise<RouteCoverResponseDto> {
         if (!file) {
-            throw new BadRequestException('Cover image is required');
+            throw new BadRequestException({
+                code: 'COVER_IMAGE_REQUIRED'
+            });
         }
 
         const route = await this.routesRepository.findForCover(routeId);
 
         if (!route) {
-            throw new NotFoundException('Route not found');
+            throw new NotFoundException({
+                code: 'ROUTE_NOT_FOUND'
+            });
         }
 
         if (route.userId !== currentUserId) {
-            throw new ForbiddenException('You cannot edit this route');
+            throw new ForbiddenException({
+                code: 'ROUTE_FORBIDDEN'
+            });
         }
 
         const oldObjectKey = route.coverObjectKey;

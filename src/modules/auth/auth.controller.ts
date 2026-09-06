@@ -151,7 +151,9 @@ export class AuthController {
             request.cookies?.refresh_token;
 
         if (!refreshToken) {
-            throw new UnauthorizedException('Refresh token is missing');
+            throw new UnauthorizedException({
+                code: 'REFRESH_TOKEN_MISSING'
+            });
         }
 
         const accessToken =

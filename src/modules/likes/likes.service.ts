@@ -13,7 +13,9 @@ export class LikesService {
         const route = await this.likesRepository.findRoute(routeId);
 
         if (!route) {
-            throw new NotFoundException('Route not found');
+            throw new NotFoundException({
+                code: 'ROUTE_NOT_FOUND'
+            });
         }
 
         const existingLike = await this.likesRepository.find(
@@ -45,7 +47,9 @@ export class LikesService {
         const route = await this.likesRepository.findRoute(routeId);
 
         if (!route) {
-            throw new NotFoundException('Route not found');
+            throw new NotFoundException({
+                code: 'ROUTE_NOT_FOUND'
+            });
         }
 
         const existingLike = await this.likesRepository.find(

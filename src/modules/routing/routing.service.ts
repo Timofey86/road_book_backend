@@ -55,8 +55,7 @@ export class RoutingService {
             }
 
             throw new BadGatewayException({
-                code: 'ROUTING_SERVICE_ERROR',
-                message: 'Routing service is currently unavailable',
+                code: 'ROUTING_SERVICE_ERROR'
             });
         }
 
@@ -66,8 +65,7 @@ export class RoutingService {
             this.logger.error('Routing service returned no route');
 
             throw new BadGatewayException({
-                code: 'ROUTING_ROUTE_NOT_FOUND',
-                message: 'Routing service returned no route',
+                code: 'ROUTING_ROUTE_NOT_FOUND'
             });
         }
 

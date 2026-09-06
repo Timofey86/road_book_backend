@@ -3,7 +3,6 @@ import { AppModule } from './app.module';
 import {BadRequestException, ValidationError, ValidationPipe} from "@nestjs/common";
 import {DocumentBuilder, SwaggerModule} from "@nestjs/swagger";
 import cookieParser from "cookie-parser";
-import {HttpExceptionFilter} from "./common/filters/http-exception.filter";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -36,15 +35,10 @@ async function bootstrap() {
 
                 throw new BadRequestException({
                     code: 'VALIDATION_ERROR',
-                    message: 'Invalid input data',
                     details,
                 });
             },
         }),
-    );
-
-    app.useGlobalFilters(
-        new HttpExceptionFilter(),
     );
 
     const swaggerConfig = new DocumentBuilder()
