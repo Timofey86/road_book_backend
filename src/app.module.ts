@@ -21,6 +21,7 @@ import {AcceptLanguageResolver, I18nModule} from "nestjs-i18n";
 import { join } from 'path';
 import {APP_FILTER} from "@nestjs/core";
 import {HttpExceptionFilter} from "./common/filters/http-exception.filter";
+import { LoggingModule } from './modules/logging/logging.module';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import {HttpExceptionFilter} from "./common/filters/http-exception.filter";
               AcceptLanguageResolver,
           ],
       }),
+      LoggingModule,
 
   ],
   controllers: [AppController],

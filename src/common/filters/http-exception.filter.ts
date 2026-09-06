@@ -3,7 +3,7 @@ import {
     Catch,
     ExceptionFilter,
     HttpException,
-    HttpStatus,
+    HttpStatus, Logger,
 } from '@nestjs/common';
 
 import type {Request, Response} from 'express';
@@ -11,6 +11,7 @@ import {
     I18nContext,
     I18nService,
 } from 'nestjs-i18n';
+import {JwtUser} from "../interfaces/jwt-user.interface";
 
 type ErrorResponseData = {
     code: string;
@@ -18,8 +19,13 @@ type ErrorResponseData = {
     args: Record<string, unknown>;
 };
 
+type AuthenticatedRequest = Request & {
+    user?: JwtUser;
+};
+
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
+    private readonly logger = new Logger(HttpExceptionFilter.name);
     constructor(private readonly i18n: I18nService) {}
 
     catch(
@@ -28,7 +34,29 @@ export class HttpExceptionFilter implements ExceptionFilter {
     ): void {
         const context = host.switchToHttp();
         const response = context.getResponse<Response>();
-        const request = context.getRequest<Request>();
+        const request = context.getRequest<AuthenticatedRequest>();
+
+        if (!(exception instanceof HttpException)) {
+            const error =
+                exception instanceof Error
+                    ? exception
+                    : new Error(String(exception));
+
+            this.logger.error(
+                JSON.stringify({
+                    timestamp: new Date().toISOString(),
+                    level: 'error',
+                    service: 'roadbook-api',
+                    requestId: request.requestId,
+                    userId: request.user?.id ?? null,
+                    method: request.method,
+                    path: request.originalUrl,
+                    errorName: error.name,
+                    message: error.message,
+                    stack: error.stack,
+                }),
+            );
+        }
 
         const statusCode =
             exception instanceof HttpException
