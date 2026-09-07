@@ -54,7 +54,7 @@ prisma-studio:
 	$(LOCAL_COMPOSE) exec app npx prisma studio --hostname 0.0.0.0 --port $(PRISMA_STUDIO_PORT)
 
 prisma-seed:
-    $(LOCAL_COMPOSE) exec app npx prisma db seed
+	$(LOCAL_COMPOSE) exec app npx prisma db seed
 
 migrate-dev:
 	$(LOCAL_COMPOSE) exec app npm run prisma:migrate:dev
