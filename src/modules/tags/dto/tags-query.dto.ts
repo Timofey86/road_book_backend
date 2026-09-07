@@ -4,7 +4,7 @@ import {IsOptional, IsString, MaxLength, MinLength} from 'class-validator';
 export class TagsQueryDto {
     @ApiPropertyOptional({
         example: 'mount',
-        description: 'Search tags by name',
+        description: 'Search tags by name. Minimum 3 characters.',
     })
     @IsOptional()
     @IsString()

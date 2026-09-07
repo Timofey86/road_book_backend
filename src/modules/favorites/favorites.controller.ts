@@ -11,6 +11,7 @@ import {
     UseGuards
 } from '@nestjs/common';
 import {
+    ApiBadRequestResponse,
     ApiCookieAuth,
     ApiNotFoundResponse,
     ApiOkResponse,
@@ -40,6 +41,10 @@ export class FavoritesController {
     @HttpCode(HttpStatus.OK)
     @ApiOkResponse({
         type: FavoriteResponseDto,
+        description: 'Route added to favorites successfully'
+    })
+    @ApiBadRequestResponse({
+        description: 'Invalid route id',
     })
     @ApiUnauthorizedResponse({
         description: 'Unauthorized',
@@ -63,6 +68,10 @@ export class FavoritesController {
     })
     @ApiOkResponse({
         type: FavoriteResponseDto,
+        description: 'Route removed from favorites successfully'
+    })
+    @ApiBadRequestResponse({
+        description: 'Invalid route id',
     })
     @ApiUnauthorizedResponse({
         description: 'Unauthorized',
@@ -86,9 +95,13 @@ export class FavoritesController {
     })
     @ApiOkResponse({
         type: FavoritesPaginatedResponseDto,
+        description: 'Favorite routes retrieved successfully',
     })
     @ApiUnauthorizedResponse({
         description: 'Unauthorized',
+    })
+    @ApiBadRequestResponse({
+        description: 'Invalid pagination parameters',
     })
     findAll(
         @CurrentUser() currentUser: JwtUser,

@@ -43,7 +43,6 @@ import {isAllowedImageMimeType} from "../../common/utils/image.utils";
 
 @Controller('routes')
 @ApiTags('Routes')
-@ApiCookieAuth('access_token')
 export class RoutesController {
     constructor(
         private readonly routesService: RoutesService,
@@ -51,10 +50,21 @@ export class RoutesController {
     ) {}
 
     @Post()
+    @ApiCookieAuth('access_token')
     @UseGuards(JwtAuthGuard)
+    @ApiOperation({
+        summary: 'Create route',
+        description: 'Creates a new route for the authenticated user.',
+    })
     @ApiCreatedResponse({
         description: 'Route successfully created',
         type: RouteResponseDto,
+    })
+    @ApiUnauthorizedResponse({
+        description: 'Unauthorized',
+    })
+    @ApiBadRequestResponse({
+        description: 'Invalid route data',
     })
     create(
         @Body() dto: CreateRouteDto,
@@ -64,19 +74,35 @@ export class RoutesController {
     }
 
     @Get('my')
+    @ApiCookieAuth('access_token')
     @UseGuards(JwtAuthGuard)
+    @ApiOperation({
+        summary: 'Get my routes',
+        description: 'Returns paginated routes created by the authenticated user.',
+    })
     @ApiOkResponse({
         description: 'Routes successfully received',
         type: RoutesPaginatedResponseDto
+    })
+    @ApiUnauthorizedResponse({
+        description: 'Unauthorized',
     })
     findMyRoutes(@CurrentUser() user: JwtUser, @Query() query: PaginationQueryDto,) {
         return this.queryService.getRoutesByUser(user.id, query.page, query.limit);
     }
 
     @Get()
+    @ApiOperation({
+        summary: 'Get routes',
+        description:
+            'Returns paginated routes with optional search, filtering and sorting.',
+    })
     @ApiOkResponse({
         description: 'Routes successfully received',
         type: RoutesPaginatedResponseDto,
+    })
+    @ApiBadRequestResponse({
+        description: 'Invalid query parameters',
     })
     findAll(
         @Query() query: RoutesQueryDto,
@@ -86,6 +112,14 @@ export class RoutesController {
 
     @Get(':id')
     @UseGuards(OptionalJwtAuthGuard)
+    @ApiOperation({
+        summary: 'Get route details',
+        description:
+            'Returns route details. Authentication is optional and is used to determine like and favorite state.',
+    })
+    @ApiBadRequestResponse({
+        description: 'Invalid route id',
+    })
     @ApiOkResponse({
         description: 'Route successfully received',
         type: RouteDetailsResponseDto
@@ -102,10 +136,22 @@ export class RoutesController {
     }
 
     @Patch(':id')
+    @ApiCookieAuth('access_token')
     @UseGuards(JwtAuthGuard)
+    @ApiOperation({
+        summary: 'Update route',
+        description:
+            'Updates title or description of a route owned by the authenticated user.',
+    })
     @ApiOkResponse({
         description: 'Route successfully updated',
         type: RouteResponseDto,
+    })
+    @ApiUnauthorizedResponse({
+        description: 'Unauthorized',
+    })
+    @ApiBadRequestResponse({
+        description: 'Invalid route id or route data',
     })
     @ApiNotFoundResponse({
         description: 'Route not found',
@@ -122,9 +168,16 @@ export class RoutesController {
     }
 
     @Delete(':id')
+    @ApiCookieAuth('access_token')
     @UseGuards(JwtAuthGuard)
     @ApiNoContentResponse({
         description: 'Route successfully deleted',
+    })
+    @ApiUnauthorizedResponse({
+        description: 'Unauthorized',
+    })
+    @ApiBadRequestResponse({
+        description: 'Invalid route id',
     })
     @ApiNotFoundResponse({
         description: 'Route not found',
@@ -141,6 +194,7 @@ export class RoutesController {
     }
 
     @Post(':id/build')
+    @ApiCookieAuth('access_token')
     @UseGuards(JwtAuthGuard)
     @ApiOperation({
         summary: 'Build route using saved stops',
@@ -172,6 +226,7 @@ export class RoutesController {
     }
 
     @Put(':id/tags')
+    @ApiCookieAuth('access_token')
     @UseGuards(JwtAuthGuard)
     @ApiOperation({
         summary: 'Replace route tags',
@@ -179,6 +234,9 @@ export class RoutesController {
     @ApiOkResponse({
         description: 'Route tags updated successfully',
         type: RouteResponseDto,
+    })
+    @ApiBadRequestResponse({
+        description: 'Invalid tags or route id',
     })
     @ApiUnauthorizedResponse({
         description: 'Unauthorized',
@@ -199,6 +257,7 @@ export class RoutesController {
 
     @Post(':id/cover')
     @UseGuards(JwtAuthGuard)
+    @ApiCookieAuth('access_token')
     @UseInterceptors(
         FileInterceptor('file', {
             limits: {
@@ -229,6 +288,7 @@ export class RoutesController {
                 file: {
                     type: 'string',
                     format: 'binary',
+                    description: 'Route cover image (JPEG, PNG or WebP, max 5 MB)',
                 },
             },
             required: ['file'],
@@ -237,6 +297,10 @@ export class RoutesController {
     @ApiOkResponse({
         description: 'Route cover uploaded successfully',
         type: RouteCoverResponseDto,
+    })
+    @ApiBadRequestResponse({
+        description:
+            'Invalid image, unsupported image type or file exceeds 5 MB',
     })
     @ApiUnauthorizedResponse({
         description: 'Unauthorized',

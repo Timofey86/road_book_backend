@@ -10,9 +10,10 @@ import {
     UseInterceptors
 } from '@nestjs/common';
 import {
+    ApiBadRequestResponse,
     ApiBody,
     ApiConsumes, ApiCookieAuth,
-    ApiCreatedResponse, ApiForbiddenResponse, ApiNotFoundResponse, ApiOkResponse,
+    ApiCreatedResponse, ApiForbiddenResponse, ApiNoContentResponse, ApiNotFoundResponse, ApiOkResponse,
     ApiOperation,
     ApiTags,
     ApiUnauthorizedResponse
@@ -73,11 +74,13 @@ export class RoutePhotosController {
                 file: {
                     type: 'string',
                     format: 'binary',
+                    description: 'Route photo (JPEG, PNG or WebP, max 5 MB)',
                 },
                 caption: {
                     type: 'string',
                     example: 'View from the Alps',
                     maxLength: 500,
+                    description: 'Optional photo caption',
                 },
             },
             required: ['file'],
@@ -85,6 +88,7 @@ export class RoutePhotosController {
     })
     @ApiCreatedResponse({
         type: RoutePhotoResponseDto,
+        description: 'Route photo uploaded successfully',
     })
     @ApiUnauthorizedResponse({
         description: 'Unauthorized',
@@ -92,6 +96,10 @@ export class RoutePhotosController {
     @ApiForbiddenResponse({
         description:
             'User is not the route owner',
+    })
+    @ApiBadRequestResponse({
+        description:
+            'Invalid image, unsupported image type, file exceeds 5 MB, invalid caption or route photo limit exceeded',
     })
     @ApiNotFoundResponse({
         description:
@@ -116,6 +124,9 @@ export class RoutePhotosController {
     @HttpCode(HttpStatus.NO_CONTENT)
     @ApiOperation({
         summary: 'Delete route photo',
+    })
+    @ApiNoContentResponse({
+        description: 'Route photo deleted successfully',
     })
     @ApiUnauthorizedResponse({
         description: 'Unauthorized',
@@ -145,12 +156,16 @@ export class RoutePhotosController {
     })
     @ApiOkResponse({
         type: [RoutePhotoResponseDto],
+        description: 'Route photos reordered successfully',
     })
     @ApiUnauthorizedResponse({
         description: 'Unauthorized',
     })
     @ApiForbiddenResponse({
         description: 'User is not the route owner',
+    })
+    @ApiBadRequestResponse({
+        description: 'Invalid photo order',
     })
     @ApiNotFoundResponse({
         description: 'Route or photo not found',
@@ -174,6 +189,7 @@ export class RoutePhotosController {
     })
     @ApiOkResponse({
         type: RoutePhotoResponseDto,
+        description: 'Route photo updated successfully',
     })
     @ApiUnauthorizedResponse({
         description: 'Unauthorized',
@@ -183,6 +199,9 @@ export class RoutePhotosController {
     })
     @ApiNotFoundResponse({
         description: 'Route or photo not found',
+    })
+    @ApiBadRequestResponse({
+        description: 'Invalid route id, photo id or photo data',
     })
     update(
         @Param('routeId', ParseIntPipe) routeId: number,

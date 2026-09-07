@@ -12,12 +12,14 @@ import {
 } from '@nestjs/common';
 import {RouteStopsService} from "./route-stops.service";
 import {
+    ApiBadRequestResponse,
+    ApiCookieAuth,
     ApiCreatedResponse,
     ApiForbiddenResponse,
     ApiNoContentResponse,
     ApiNotFoundResponse,
     ApiOkResponse,
-    ApiTags
+    ApiTags, ApiUnauthorizedResponse
 } from "@nestjs/swagger";
 import {RouteStopResponseDto} from "./response/route-stop-response.dto";
 import {CreateRouteStopDto} from "./dto/create-route-stop.dto";
@@ -28,12 +30,13 @@ import {UpdateRouteStopDto} from "./dto/update-route-stop.dto";
 import {ReorderRouteStopsDto} from "./dto/reorder-route-stops.dto";
 
 @ApiTags('Route Stops')
-@Controller('route-stops')
+@ApiCookieAuth('access_token')
+@Controller('routes/:routeId/stops')
 export class RouteStopsController {
     constructor(private readonly routeStopsService: RouteStopsService) {
     }
 
-    @Post(':routeId/stops')
+    @Post()
     @UseGuards(JwtAuthGuard)
     @ApiCreatedResponse({
         description: 'Route stop successfully created',
@@ -44,6 +47,12 @@ export class RouteStopsController {
     })
     @ApiForbiddenResponse({
         description: 'You cannot modify this route',
+    })
+    @ApiUnauthorizedResponse({
+        description: 'Unauthorized',
+    })
+    @ApiBadRequestResponse({
+        description: 'Invalid route id or route stop data',
     })
     create(
         @Param('routeId', ParseIntPipe) routeId: number,
@@ -57,7 +66,7 @@ export class RouteStopsController {
         )
     }
 
-    @Patch(':routeId/stops/reorder')
+    @Patch('reorder')
     @UseGuards(JwtAuthGuard)
     @ApiOkResponse({
         description: 'Route stops successfully reordered',
@@ -68,6 +77,9 @@ export class RouteStopsController {
     })
     @ApiForbiddenResponse({
         description: 'You cannot modify this route',
+    })
+    @ApiUnauthorizedResponse({
+        description: 'Unauthorized',
     })
     reorder(
         @Param('routeId', ParseIntPipe) routeId: number,
@@ -81,7 +93,7 @@ export class RouteStopsController {
         );
     }
 
-    @Patch(':routeId/stops/:stopId')
+    @Patch(':stopId')
     @UseGuards(JwtAuthGuard)
     @ApiOkResponse({
         description: 'Route stop successfully updated',
@@ -92,6 +104,12 @@ export class RouteStopsController {
     })
     @ApiForbiddenResponse({
         description: 'You cannot modify this route',
+    })
+    @ApiUnauthorizedResponse({
+        description: 'Unauthorized',
+    })
+    @ApiBadRequestResponse({
+        description: 'Invalid route id, stop id or route stop data',
     })
     update(
         @Param('routeId', ParseIntPipe) routeId: number,
@@ -107,7 +125,7 @@ export class RouteStopsController {
         );
     }
 
-    @Delete(':routeId/stops/:stopId')
+    @Delete(':stopId')
     @UseGuards(JwtAuthGuard)
     @HttpCode(HttpStatus.NO_CONTENT)
     @ApiNoContentResponse({
@@ -118,6 +136,9 @@ export class RouteStopsController {
     })
     @ApiForbiddenResponse({
         description: 'You cannot modify this route',
+    })
+    @ApiUnauthorizedResponse({
+        description: 'Unauthorized',
     })
     delete(
         @Param('routeId', ParseIntPipe) routeId: number,

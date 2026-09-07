@@ -16,9 +16,10 @@ import type {JwtUser} from "../../common/interfaces/jwt-user.interface";
 import {UpdateUserDto} from "./dto/update-user.dto";
 import {FileInterceptor} from "@nestjs/platform-express";
 import {
+    ApiBadRequestResponse,
     ApiBody,
     ApiConsumes, ApiCookieAuth,
-    ApiCreatedResponse, ApiNoContentResponse,
+    ApiCreatedResponse, ApiNoContentResponse, ApiNotFoundResponse,
     ApiOkResponse,
     ApiOperation,
     ApiTags, ApiUnauthorizedResponse
@@ -36,6 +37,9 @@ export class UsersController {
     @ApiCookieAuth('access_token')
     @ApiUnauthorizedResponse({
         description: 'Unauthorized',
+    })
+    @ApiBadRequestResponse({
+        description: 'Invalid input data',
     })
     @ApiOkResponse({
         description: 'User profile successfully updated',
@@ -55,6 +59,9 @@ export class UsersController {
     @ApiCookieAuth('access_token')
     @ApiUnauthorizedResponse({
         description: 'Unauthorized',
+    })
+    @ApiBadRequestResponse({
+        description: 'Invalid file, unsupported file type or file exceeds 5 MB',
     })
     @ApiOperation({
         summary: 'Upload user avatar',
@@ -147,6 +154,12 @@ export class UsersController {
         description: 'Public user profile',
         type: PublicUserResponseDto,
     })
+    @ApiNotFoundResponse({
+        description: 'User not found',
+    })
+    @ApiBadRequestResponse({
+        description: 'Invalid user id',
+    }) 
     getPublicProfile(
         @Param('id', ParseIntPipe) id: number,
     ): Promise<PublicUserResponseDto> {

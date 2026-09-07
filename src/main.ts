@@ -1,11 +1,11 @@
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
+import {NestFactory} from '@nestjs/core';
+import {AppModule} from './app.module';
 import {BadRequestException, ValidationError, ValidationPipe} from "@nestjs/common";
 import {DocumentBuilder, SwaggerModule} from "@nestjs/swagger";
 import cookieParser from "cookie-parser";
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+    const app = await NestFactory.create(AppModule);
 
     app.setGlobalPrefix('api');
     app.use(cookieParser());
@@ -45,10 +45,21 @@ async function bootstrap() {
         .setTitle('RoadBook API')
         .setDescription('Backend API for the RoadBook application')
         .setVersion('1.0')
-        .addCookieAuth('access_token', {
-            type: 'apiKey',
-            in: 'cookie',
-        })
+        .addCookieAuth('access_token',
+            {
+                type: 'apiKey',
+                in: 'cookie',
+            },
+            'access_token',
+        )
+        .addCookieAuth(
+            'refresh_token',
+            {
+                type: 'apiKey',
+                in: 'cookie',
+            },
+            'refresh_token',
+        )
         .build();
 
     const document = SwaggerModule.createDocument(
@@ -58,6 +69,7 @@ async function bootstrap() {
 
     SwaggerModule.setup('api/docs', app, document);
 
-  await app.listen(process.env.PORT ?? 3000);
+    await app.listen(process.env.PORT ?? 3000);
 }
+
 bootstrap();

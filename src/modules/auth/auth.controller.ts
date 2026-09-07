@@ -16,6 +16,7 @@ import {LoginDto} from "./dto/login.dto";
 import type { Response, Request } from 'express';
 
 import {
+    ApiBadRequestResponse,
     ApiConflictResponse, ApiCookieAuth,
     ApiCreatedResponse, ApiNoContentResponse, ApiOkResponse,
     ApiOperation,
@@ -45,6 +46,9 @@ export class AuthController {
         description: 'User successfully registered',
         type: CurrentUserResponseDto,
     })
+    @ApiBadRequestResponse({
+        description: 'Invalid registration data',
+    })
     @ApiConflictResponse({
         description: 'User with this email already exists',
     })
@@ -62,6 +66,9 @@ export class AuthController {
     @ApiNoContentResponse({
         description:
             'Login successful. Access and refresh tokens were stored in HttpOnly cookies.',
+    })
+    @ApiBadRequestResponse({
+        description: 'Invalid login data',
     })
     @ApiUnauthorizedResponse({
         description: 'Invalid email or password',
@@ -130,6 +137,7 @@ export class AuthController {
     }
 
     @Post('refresh')
+    @ApiCookieAuth('refresh_token')
     @HttpCode(HttpStatus.NO_CONTENT)
     @ApiOperation({
         summary: 'Refresh access token',

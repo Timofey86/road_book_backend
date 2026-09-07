@@ -1,5 +1,6 @@
 import {Controller, Delete, HttpCode, HttpStatus, Param, ParseIntPipe, Post, UseGuards} from '@nestjs/common';
 import {
+    ApiBadRequestResponse,
     ApiCookieAuth,
     ApiNotFoundResponse,
     ApiOkResponse,
@@ -27,6 +28,13 @@ export class LikesController {
     })
     @ApiOkResponse({
         type: LikeResponseDto,
+        description: 'Route liked successfully',
+    })
+    @ApiUnauthorizedResponse({
+        description: 'Unauthorized',
+    })
+    @ApiNotFoundResponse({
+        description: 'Route not found',
     })
     like(
         @Param('routeId', ParseIntPipe) routeId: number,
@@ -41,12 +49,16 @@ export class LikesController {
     })
     @ApiOkResponse({
         type: LikeResponseDto,
+        description: 'Route unliked successfully',
     })
     @ApiUnauthorizedResponse({
         description: 'Unauthorized',
     })
     @ApiNotFoundResponse({
         description: 'Route not found',
+    })
+    @ApiBadRequestResponse({
+        description: 'Invalid route id',
     })
     unlike(
         @Param('routeId', ParseIntPipe) routeId: number,
@@ -57,5 +69,4 @@ export class LikesController {
             user.id,
         );
     }
-
 }

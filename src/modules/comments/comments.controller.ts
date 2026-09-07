@@ -12,6 +12,7 @@ import {
     UseGuards
 } from '@nestjs/common';
 import {
+    ApiBadRequestResponse,
     ApiCookieAuth,
     ApiCreatedResponse, ApiForbiddenResponse, ApiNoContentResponse,
     ApiNotFoundResponse, ApiOkResponse,
@@ -42,6 +43,10 @@ export class CommentsController {
     })
     @ApiCreatedResponse({
         type: CommentResponseDto,
+        description: 'Comment successfully created',
+    })
+    @ApiBadRequestResponse({
+        description: 'Invalid comment data or route id',
     })
     @ApiUnauthorizedResponse({
         description: 'Unauthorized',
@@ -67,9 +72,13 @@ export class CommentsController {
     })
     @ApiOkResponse({
         type: CommentsPaginatedResponseDto,
+        description: 'Route comments retrieved successfully',
     })
     @ApiNotFoundResponse({
         description: 'Route not found',
+    })
+    @ApiBadRequestResponse({
+        description: 'Invalid route id or pagination parameters',
     })
     findAllByRoute(
         @Param('routeId', ParseIntPipe) routeId: number,
@@ -89,6 +98,7 @@ export class CommentsController {
     })
     @ApiOkResponse({
         type: CommentResponseDto,
+        description: 'Comment successfully updated',
     })
     @ApiUnauthorizedResponse({
         description: 'Unauthorized',
@@ -98,6 +108,9 @@ export class CommentsController {
     })
     @ApiNotFoundResponse({
         description: 'Comment not found',
+    })
+    @ApiBadRequestResponse({
+        description: 'Invalid comment id or comment data',
     })
     update(
         @Param('commentId', ParseIntPipe) commentId: number,
@@ -139,5 +152,4 @@ export class CommentsController {
             user.id,
         );
     }
-
 }

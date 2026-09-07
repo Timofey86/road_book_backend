@@ -1,6 +1,6 @@
 import {Controller, Get, Query, UseGuards} from '@nestjs/common';
 import {
-    ApiBadGatewayResponse,
+    ApiBadGatewayResponse, ApiBadRequestResponse,
     ApiCookieAuth,
     ApiOkResponse,
     ApiOperation,
@@ -22,6 +22,7 @@ export class PlacesController {
     @ApiCookieAuth('access_token')
     @ApiOperation({
         summary: 'Search places',
+        description: 'Searches for places using the external geocoding service.',
     })
     @ApiOkResponse({
         description: 'Places found successfully',
@@ -32,6 +33,9 @@ export class PlacesController {
     })
     @ApiBadGatewayResponse({
         description: 'Geocoding service is currently unavailable',
+    })
+    @ApiBadRequestResponse({
+        description: 'Invalid place search query',
     })
     async search(
         @Query() query: PlacesSearchQueryDto,
