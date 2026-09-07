@@ -278,3 +278,9 @@ The current development focus is frontend integration.
 
 Centralized Elasticsearch/Kibana logging is planned as a later
 infrastructure step.
+
+## Future Improvements
+
+- Password recovery via email
+- Email verification
+- Centralized logging with Elasticsearch and Kibana
