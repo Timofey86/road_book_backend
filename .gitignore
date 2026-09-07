@@ -1,19 +1,35 @@
+# Dependencies
 node_modules/
+
+# Build
 dist/
 coverage/
 
+# Environment
 .env
 .env.local
+.env.*.local
 
+# IDE
 .idea/
 .vscode/
 
+# Logs
+*.log
 npm-debug.log*
-/generated/prisma
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Generated Prisma Client
 /src/generated/
 
+# OS
+.DS_Store
+Thumbs.db
+
+# AI / local tools
 .claude/
 .windsurf/
 .agents/
-
 skills-lock.json
