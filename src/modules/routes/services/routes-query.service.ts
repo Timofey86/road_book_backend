@@ -68,6 +68,7 @@ export class RoutesQueryService {
         const skip = (page - 1) * limit;
         const normalizedSearch = search?.trim();
         const where: Prisma.RouteWhereInput = {
+            isRouteActual: true,
             ...(userId !== undefined && {
                 userId,
             }),
