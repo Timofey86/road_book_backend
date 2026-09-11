@@ -1,11 +1,12 @@
 import {
-    IsEmail, IsNotEmpty,
+    IsEmail, IsEnum, IsNotEmpty,
     IsOptional,
     IsString, Matches,
     MaxLength,
     MinLength,
 } from 'class-validator';
 import {ApiProperty, ApiPropertyOptional} from "@nestjs/swagger";
+import {PreferredLanguage} from "../../../generated/prisma/enums";
 
 export class RegisterDto {
     @IsString()
@@ -46,4 +47,12 @@ export class RegisterDto {
         nullable: true,
     })
     bio?: string;
+
+    @IsOptional()
+    @IsEnum(PreferredLanguage)
+    @ApiPropertyOptional({
+        enum: PreferredLanguage,
+        example: PreferredLanguage.en,
+    })
+    preferredLanguage?: PreferredLanguage;
 }

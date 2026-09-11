@@ -235,6 +235,17 @@ export class RoutesRepository {
                         avatarObjectKey: true,
                     },
                 },
+                routeTags: {
+                    include: {
+                        tag: {
+                            select: {
+                                id: true,
+                                name: true,
+                                slug: true,
+                            },
+                        },
+                    },
+                },
                 _count: {
                     select: {
                         stops: true,
@@ -274,6 +285,19 @@ export class RoutesRepository {
                         avatarObjectKey: true,
                     },
                 },
+
+                routeTags: {
+                    include: {
+                        tag: {
+                            select: {
+                                id: true,
+                                name: true,
+                                slug: true,
+                            },
+                        },
+                    },
+                },
+
                 _count: {
                     select: {
                         stops: true,

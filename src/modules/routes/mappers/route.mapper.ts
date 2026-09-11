@@ -132,6 +132,11 @@ export class RouteMapper {
                 name: route.user.name,
                 avatarUrl,
             },
+            tags: route.routeTags.map(({ tag }) => ({
+                id: tag.id,
+                name: tag.name,
+                slug: tag.slug,
+            })),
             totalDistanceMeters:  route.totalDistanceMeters,
             totalDurationSeconds: route.totalDurationSeconds,
             stopsCount: route._count.stops,

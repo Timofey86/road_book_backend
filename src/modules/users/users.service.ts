@@ -6,6 +6,7 @@ import {UserMapper} from "./mappers/user.mapper";
 import {UsersRepository} from "./repositories/user.repository";
 import {CurrentUserResponseDto} from "./response/current-user-response.dto";
 import {PublicUserResponseDto} from "./response/public-user-response.dto";
+import {PreferredLanguage} from "../../generated/prisma/enums";
 
 @Injectable()
 export class UsersService {
@@ -22,33 +23,12 @@ export class UsersService {
         return this.usersRepository.findByEmail(email);
     }
 
-    // async toResponseDto(
-    //     user: {
-    //         id: number;
-    //         name: string;
-    //         email: string;
-    //         bio: string | null;
-    //         avatarObjectKey: string | null;
-    //         preferredLanguage: PreferredLanguage;
-    //         createdAt: Date;
-    //         updatedAt: Date;
-    //     },
-    // ): Promise<UserResponseDto> {
-    //     const avatarUrl = user.avatarObjectKey
-    //         ? await this.storageService.getSignedUrl(user.avatarObjectKey)
-    //         : null;
-    //
-    //     return {
-    //         ...user,
-    //         avatarUrl,
-    //     };
-    // }
-
     create(data: {
         name: string;
         email: string;
         passwordHash: string;
         bio?: string;
+        preferredLanguage?: PreferredLanguage;
     }) {
         return this.usersRepository.create(data);
     }

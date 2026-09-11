@@ -14,6 +14,17 @@ export class RouteListAuthorResponseDto {
     avatarUrl: string | null;
 }
 
+export class RouteListTagResponseDto {
+    @ApiProperty({ example: 1 })
+    id: number;
+
+    @ApiProperty({ example: 'Mountains' })
+    name: string;
+
+    @ApiProperty({ example: 'mountains' })
+    slug: string;
+}
+
 export class RouteListItemResponseDto {
     @ApiProperty({ example: 1 })
     id: number;
@@ -40,6 +51,11 @@ export class RouteListItemResponseDto {
         type: RouteListAuthorResponseDto,
     })
     author: RouteListAuthorResponseDto;
+
+    @ApiProperty({
+        type: [RouteListTagResponseDto],
+    })
+    tags: RouteListTagResponseDto[];
 
     @ApiProperty({
         example: null,

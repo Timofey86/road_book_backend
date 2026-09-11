@@ -63,6 +63,17 @@ export class FavoritesRepository {
                                 avatarObjectKey: true
                             }
                         },
+                        routeTags: {
+                            include: {
+                                tag: {
+                                    select: {
+                                        id: true,
+                                        name: true,
+                                        slug: true,
+                                    },
+                                },
+                            },
+                        },
                         _count: {
                             select: {
                                 stops: true,

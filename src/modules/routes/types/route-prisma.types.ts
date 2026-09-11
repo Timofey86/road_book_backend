@@ -68,6 +68,18 @@ export type RouteListEntity = Prisma.RouteGetPayload<{
                 avatarObjectKey: true;
             };
         };
+
+        routeTags: {
+            include: {
+                tag: {
+                    select: {
+                        id: true;
+                        name: true;
+                        slug: true;
+                    }
+                };
+            };
+        };
         _count: {
             select: {
                 stops: true;

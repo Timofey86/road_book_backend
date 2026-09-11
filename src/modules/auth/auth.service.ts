@@ -39,6 +39,7 @@ export class AuthService {
                 email,
                 passwordHash,
                 bio: dto.bio,
+                preferredLanguage: dto.preferredLanguage,
             });
 
             return this.usersService.findMe(user.id);
