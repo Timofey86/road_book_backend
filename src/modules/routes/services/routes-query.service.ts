@@ -62,11 +62,20 @@ export class RoutesQueryService {
             sortOrder,
             minDistance,
             maxDistance,
+            tags,
             userId
         } = query;
 
         const skip = (page - 1) * limit;
         const normalizedSearch = search?.trim();
+        const tagSlugs = [
+            ...new Set(
+                tags
+                    ?.split(',')
+                    .map((tag) => tag.trim())
+                    .filter(Boolean),
+            ),
+        ];
         const where: Prisma.RouteWhereInput = {
             isRouteActual: true,
             ...(userId !== undefined && {
@@ -102,6 +111,18 @@ export class RoutesQueryService {
                     }
                     : {}
             ),
+
+            ...(tagSlugs?.length && {
+                routeTags: {
+                    some: {
+                        tag: {
+                            slug: {
+                                in: tagSlugs,
+                            },
+                        },
+                    },
+                },
+            }),
         };
 
         let orderBy: Prisma.RouteOrderByWithRelationInput[];

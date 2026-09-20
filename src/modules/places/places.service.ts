@@ -35,7 +35,7 @@ export class PlacesService {
                             text: query,
                             size: 5,
                         },
-                        timeout: 5000
+                        timeout: 10000
                     },
                 )
             )
@@ -57,16 +57,15 @@ export class PlacesService {
             });
         } catch (error) {
             if (error instanceof AxiosError) {
-                this.logger.error(
-                    `Geocoding request failed: status=${error.response?.status}, message=${error.message}`,
-                );
-            } else {
-                this.logger.error(
-                    'Unknown geocoding error',
-                    error instanceof Error
-                        ? error.stack
-                        : undefined,
-                );
+                if (error.code === 'ECONNABORTED') {
+                    this.logger.error(
+                        `Geocoding request timeout: ${error.message}`,
+                    );
+                } else {
+                    this.logger.error(
+                        `Geocoding request failed: status=${error.response?.status}, message=${error.message}`,
+                    );
+                }
             }
 
             throw new BadGatewayException({

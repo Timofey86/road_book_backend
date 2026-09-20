@@ -81,4 +81,12 @@ export class RoutesQueryDto extends PaginationQueryDto {
         description: 'Filter routes by user ID',
     })
     userId?: number;
+
+    @ApiPropertyOptional({
+        example: 'mountains,nature,germany',
+        description: 'Comma-separated tag slugs',
+    })
+    @IsOptional()
+    @IsString()
+    tags?: string;
 }
