@@ -14,6 +14,7 @@ export class StorageService {
     private readonly s3: S3Client
     private readonly bucket: string;
     private readonly publicS3: S3Client;
+    private readonly isProduction: boolean;
     private readonly logger = new Logger(StorageService.name);
 
     constructor(
@@ -25,36 +26,65 @@ export class StorageService {
         const region =
             this.configService.getOrThrow<string>('S3_REGION');
 
-        const forcePathStyle =
-            this.configService.get<string>('S3_FORCE_PATH_STYLE') === 'true';
+        this.isProduction =
+            this.configService.get<string>('NODE_ENV') === 'production';
 
-        const credentials = {
-            accessKeyId:
-                this.configService.getOrThrow<string>('S3_ACCESS_KEY'),
-            secretAccessKey:
-                this.configService.getOrThrow<string>('S3_SECRET_KEY'),
-        };
+        if (this.isProduction) {
+            /*
+             * AWS S3
+             *
+             * No custom endpoint.
+             * No explicit credentials.
+             *
+             * AWS SDK will use the default credential provider chain,
+             * including the IAM Role attached to EC2.
+             */
+            this.s3 = new S3Client({
+                region,
+            });
 
-        this.s3 = new S3Client({
-            region,
-            endpoint:
-                this.configService.getOrThrow<string>('S3_ENDPOINT'),
-            forcePathStyle,
-            credentials,
-        });
+            this.publicS3 = this.s3;
+        } else {
+            /*
+             * Local MinIO
+             */
+            const forcePathStyle =
+                this.configService.get<string>('S3_FORCE_PATH_STYLE') === 'true';
 
-        this.publicS3 = new S3Client({
-            region,
-            endpoint:
-                this.configService.getOrThrow<string>('S3_PUBLIC_ENDPOINT'),
-            forcePathStyle,
-            credentials,
-        });
+            const credentials = {
+                accessKeyId:
+                    this.configService.getOrThrow<string>('S3_ACCESS_KEY'),
+                secretAccessKey:
+                    this.configService.getOrThrow<string>('S3_SECRET_KEY'),
+            };
+
+            this.s3 = new S3Client({
+                region,
+                endpoint:
+                    this.configService.getOrThrow<string>('S3_ENDPOINT'),
+                forcePathStyle,
+                credentials,
+            });
+
+            /*
+                 * Used only for generating URLs accessible
+                 * from the host/browser.
+
+                 */
+
+            this.publicS3 = new S3Client({
+                region,
+                endpoint:
+                    this.configService.getOrThrow<string>('S3_PUBLIC_ENDPOINT'),
+                forcePathStyle,
+                credentials,
+            });
+        }
     }
 
 
     async onModuleInit(): Promise<void> {
-        if (this.configService.get<string>('NODE_ENV') === 'development') {
+        if (!this.isProduction) {
             await this.ensureBucketExists();
         }
     }

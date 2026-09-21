@@ -10,8 +10,25 @@ services:
     ports:
       - "${APP_EXTERNAL_PORT}:${APP_PORT}"
     depends_on:
-      - mysql
-      - redis
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "node",
+          "-e",
+          "fetch('http://localhost:${APP_PORT}/api/health').then(r => { if (!r.ok) process.exit(1) }).catch(() => process.exit(1))"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+
     restart: unless-stopped
     networks:
       - road_book
@@ -20,27 +37,62 @@ services:
     image: mysql:8.4
     container_name: ${PROJECT_NAME}_mysql
     command: --port=${MYSQL_PORT}
-    env_file:
-      - .env
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+
     volumes:
       - mysql_data:/var/lib/mysql
+
     restart: unless-stopped
+
     networks:
       - road_book
+
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "mysqladmin ping -h localhost -u root -p$$MYSQL_ROOT_PASSWORD --silent"
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
 
   redis:
     image: redis:alpine
     container_name: ${PROJECT_NAME}_redis
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      REDIS_PORT: ${REDIS_PORT}
+
     command: >
       redis-server
       --port ${REDIS_PORT}
       --appendonly yes
       --requirepass ${REDIS_PASSWORD}
+
     volumes:
       - redis_data:/data
+
     restart: unless-stopped
+
     networks:
       - road_book
+
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "redis-cli -a \"$$REDIS_PASSWORD\" ping | grep PONG"
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 5s
 
 volumes:
   mysql_data:

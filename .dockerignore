@@ -5,6 +5,9 @@ coverage
 .gitignore
 .env
 .env.local
+.env.*.local
+*.log
 npm-debug.log*
 .idea
 .vscode
+README.md

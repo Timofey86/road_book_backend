@@ -20,12 +20,14 @@ import { join } from 'path';
 import {APP_FILTER} from "@nestjs/core";
 import {HttpExceptionFilter} from "./common/filters/http-exception.filter";
 import { LoggingModule } from './modules/logging/logging.module';
+import {HealthModule} from "./health/health.module";
 
 @Module({
   imports: [
       ConfigModule.forRoot({
           isGlobal: true,
       }),
+      HealthModule,
       PrismaModule,
       UsersModule,
       AuthModule,

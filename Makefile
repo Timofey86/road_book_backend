@@ -3,19 +3,24 @@ SHELL := /bin/bash
 
 DIR := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 
-include $(DIR)/.env
--include $(DIR)/.env.local
+LOCAL_COMPOSE := docker compose \
+	--env-file $(DIR)/.env \
+	--env-file $(DIR)/.env.local \
+	-f $(DIR)/docker-compose.local.yml
 
-export
+PROD_COMPOSE := docker compose \
+	--env-file $(DIR)/.env \
+	-f $(DIR)/docker-compose.yml
 
-LOCAL_COMPOSE := docker compose -f $(DIR)/docker-compose.local.yml
-PROD_COMPOSE := docker compose -f $(DIR)/docker-compose.yml
+.PHONY: \
+	local-build local-up local-down local-restart local-logs local-ps local-reset local-config \
+	app-shell app-shell-root \
+	prisma-generate prisma-studio prisma-seed migrate-dev migrate-deploy seed-deploy prod-reset \
+	prod-build prod-up prod-down prod-restart prod-logs prod-ps prod-config prod-db-up
 
-.PHONY: local-up local-down local-restart local-logs local-ps local-reset \
-        app-shell prisma-generate prisma-studio prisma-seed migrate-dev migrate-deploy \
-        prod-up prod-down prod-restart prod-logs prod-ps local-config app-shell-root \
-        local-build
-
+# =========================
+# Local
+# =========================
 
 local-build:
 	$(LOCAL_COMPOSE) up -d --build
@@ -41,11 +46,19 @@ local-reset:
 local-config:
 	$(LOCAL_COMPOSE) config
 
+# =========================
+# App
+# =========================
+
 app-shell:
 	$(LOCAL_COMPOSE) exec app sh
 
 app-shell-root:
 	$(LOCAL_COMPOSE) exec -u root app sh
+
+# =========================
+# Prisma
+# =========================
 
 prisma-generate:
 	$(LOCAL_COMPOSE) exec app npm run prisma:generate
@@ -60,13 +73,32 @@ migrate-dev:
 	$(LOCAL_COMPOSE) exec app npm run prisma:migrate:dev
 
 migrate-deploy:
-	$(PROD_COMPOSE) exec app npm run prisma:migrate:deploy
+	$(PROD_COMPOSE) run --rm app npm run prisma:migrate:deploy
+
+seed-deploy:
+	$(PROD_COMPOSE) run --rm \
+    		-e ALLOW_PRODUCTION_SEED=true \
+    		-e SEED_USER_PASSWORD="$(SEED_USER_PASSWORD)" \
+    		app node dist/prisma/seed.js
+
+# =========================
+# Production
+# =========================
+
+prod-build:
+	$(PROD_COMPOSE) build
+
+prod-db-up:
+	$(PROD_COMPOSE) up -d mysql redis
 
 prod-up:
 	$(PROD_COMPOSE) up -d --build
 
 prod-down:
 	$(PROD_COMPOSE) down
+
+prod-reset:
+	$(PROD_COMPOSE) down -v
 
 prod-restart:
 	$(PROD_COMPOSE) down
@@ -77,3 +109,6 @@ prod-logs:
 
 prod-ps:
 	$(PROD_COMPOSE) ps
+
+prod-config:
+	$(PROD_COMPOSE) config

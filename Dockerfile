@@ -23,7 +23,7 @@ RUN npm ci
 COPY prisma ./prisma
 COPY prisma.config.ts ./
 
-RUN npm run prisma:generate --if-present
+RUN DATABASE_URL="mysql://placeholder:placeholder@localhost:3306/placeholder" npm run prisma:generate
 
 COPY src ./src
 COPY test ./test
