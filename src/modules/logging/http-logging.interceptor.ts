@@ -12,6 +12,7 @@ import {
 import { tap } from 'rxjs/operators';
 import type {Request, Response} from 'express';
 import {ConfigService} from "@nestjs/config";
+import {ElasticsearchService} from "./elasticsearch.service";
 
 type AuthenticatedRequest = Request & {
     user?: JwtUser;
@@ -23,6 +24,7 @@ export class HttpLoggingInterceptor implements NestInterceptor {
 
     constructor(
         private readonly configService: ConfigService,
+        private readonly elasticsearchService: ElasticsearchService,
     ) {}
 
     intercept(
@@ -64,24 +66,52 @@ export class HttpLoggingInterceptor implements NestInterceptor {
         statusCode: number,
         startedAt: number,
     ): void {
-        this.logger.log(
-            JSON.stringify({
-                timestamp: new Date().toISOString(),
-                level: 'info',
-                service: 'roadbook-api',
-                environment:
-                    this.configService.get<string>('NODE_ENV') ??
-                    'development',
-                requestId: request.requestId,
-                method: request.method,
-                path: request.originalUrl,
-                statusCode,
-                durationMs: Date.now() - startedAt,
-                userId: request.user?.id ?? null,
-                ip: request.ip,
-                userAgent: request.get('user-agent') ?? null,
-                message: 'HTTP request completed',
-            }),
-        );
+        // this.logger.log(
+        //     JSON.stringify({
+        //         '@timestamp': new Date().toISOString(),
+        //         level: 'info',
+        //         service: 'roadbook-api',
+        //         environment:
+        //             this.configService.get<string>('NODE_ENV') ??
+        //             'development',
+        //         requestId: request.requestId,
+        //         method: request.method,
+        //         path: request.originalUrl,
+        //         statusCode,
+        //         durationMs: Date.now() - startedAt,
+        //         userId: request.user?.id ?? null,
+        //         ip: request.ip,
+        //         userAgent: request.get('user-agent') ?? null,
+        //         message: 'HTTP request completed',
+        //     }),
+        // );
+        const logEntry = {
+            '@timestamp': new Date().toISOString(),
+            level: 'info',
+            service: 'roadbook-api',
+            environment:
+                this.configService.get<string>('NODE_ENV') ??
+                'development',
+            requestId: request.requestId,
+            method: request.method,
+            path: request.originalUrl,
+            statusCode,
+            durationMs: Date.now() - startedAt,
+            userId: request.user?.id ?? null,
+            ip: request.ip,
+            userAgent: request.get('user-agent') ?? null,
+            message: 'HTTP request completed',
+        };
+
+        this.logger.log(JSON.stringify(logEntry));
+
+        void this.elasticsearchService
+            .index(logEntry)
+            .catch((error: unknown) => {
+                this.logger.error(
+                    'Failed to send log to Elasticsearch',
+                    error,
+                );
+            });
     }
 }
