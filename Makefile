@@ -16,7 +16,7 @@ PROD_COMPOSE := docker compose \
 	local-build local-up local-down local-restart local-logs local-ps local-reset local-config \
 	app-shell app-shell-root \
 	prisma-generate prisma-studio prisma-seed migrate-dev migrate-deploy seed-deploy prod-reset \
-	prod-build prod-up prod-down prod-restart prod-logs prod-ps prod-config prod-db-up
+	prod-build prod-up prod-down prod-restart prod-logs prod-ps prod-config prod-db-up setup-ssl-renewal init-ssl
 
 # =========================
 # Local
@@ -112,3 +112,13 @@ prod-ps:
 
 prod-config:
 	$(PROD_COMPOSE) config
+
+setup-ssl-renewal:
+	./deploy/setup-ssl-renewal.sh
+
+init-ssl:
+	@if [ -z "$(EMAIL)" ]; then \
+		echo "Usage: make init-ssl EMAIL=your@email.com"; \
+		exit 1; \
+	fi
+	SSL_EMAIL="$(EMAIL)" ./deploy/init-ssl.sh
