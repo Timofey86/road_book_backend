@@ -42,6 +42,7 @@ services:
     volumes:
       - ./docker/nginx/default.conf.template:/etc/nginx/templates/default.conf.template:ro
       - certbot_www:/var/www/certbot
+      - certbot_conf:/etc/letsencrypt
     depends_on:
       app:
         condition: service_healthy
@@ -114,6 +115,7 @@ volumes:
   mysql_data:
   redis_data:
   certbot_www:
+  certbot_conf:
 
 networks:
   road_book:
