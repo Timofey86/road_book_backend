@@ -7,8 +7,6 @@ services:
     container_name: ${PROJECT_NAME}_app
     env_file:
       - .env
-    ports:
-      - "${APP_EXTERNAL_PORT}:${APP_PORT}"
     depends_on:
       mysql:
         condition: service_healthy
@@ -29,6 +27,23 @@ services:
       start_period: 10s
 
 
+    restart: unless-stopped
+    networks:
+      - road_book
+
+  nginx:
+    image: nginx:1.28-alpine
+    container_name: ${PROJECT_NAME}_nginx
+    environment:
+      API_DOMAIN: ${API_DOMAIN}
+      APP_PORT: ${APP_PORT}
+    ports:
+      - "80:80"
+    volumes:
+      - ./docker/nginx/default.conf.template:/etc/nginx/templates/default.conf.template:ro
+    depends_on:
+      app:
+        condition: service_healthy
     restart: unless-stopped
     networks:
       - road_book
