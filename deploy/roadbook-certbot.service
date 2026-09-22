@@ -1,0 +1,10 @@
+[Unit]
+Description=Renew RoadBook SSL certificate
+Requires=docker.service
+After=docker.service
+
+[Service]
+Type=oneshot
+User=ec2-user
+WorkingDirectory=/home/ec2-user/road_book_backend
+ExecStart=/home/ec2-user/road_book_backend/deploy/renew-ssl.sh
