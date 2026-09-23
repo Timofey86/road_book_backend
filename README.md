@@ -328,8 +328,6 @@ OpenRouteService / HeiGIT APIs are used for:
 
 The API key is configured through `ORS_API_KEY`.
 
-> Do not commit the real key.
-
 ## API Documentation & Postman
 
 Swagger UI:
