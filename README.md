@@ -2,6 +2,10 @@
 
 Backend API for **RoadBook**, a web application for planning, documenting, and sharing road trips.
 
+🌐 **Frontend:** https://roadbooktravel.com
+
+📚 **Swagger / API Docs:** https://api.roadbooktravel.com/api/docs
+
 Users can create routes, organize stops, calculate route geometry and travel estimates, upload photos, interact through comments and likes, save routes to favorites, and discover routes created by other users.
 
 ## Features
