@@ -313,28 +313,28 @@ async function main(): Promise<void> {
     console.log('🌄 Uploading route covers...');
 
     const wuppertalBonnCoverKey = await uploadSeedImage(
-        join(seedAssetsPath, 'routes', 'wuppertal-bonn.jpg'),
-        'routes/seed/wuppertal-bonn.jpg',
+        join(seedAssetsPath, 'routes', 'wuppertal-bonn.png'),
+        'routes/seed/wuppertal-bonn.png',
     );
 
     const bavariaCoverKey = await uploadSeedImage(
-        join(seedAssetsPath, 'routes', 'bavarian-alps.jpg'),
-        'routes/seed/bavarian-alps.jpg',
+        join(seedAssetsPath, 'routes', 'bavarian-alps.png'),
+        'routes/seed/bavarian-alps.png',
     );
 
     const balticSeaCoverKey = await uploadSeedImage(
-        join(seedAssetsPath, 'routes', 'baltic-sea.jpg'),
-        'routes/seed/baltic-sea.jpg',
+        join(seedAssetsPath, 'routes', 'baltic-sea.png'),
+        'routes/seed/baltic-sea.png',
     );
 
     const berlinSpreewaldCoverKey = await uploadSeedImage(
-        join(seedAssetsPath, 'routes', 'berlin-spreewald.jpg'),
-        'routes/seed/berlin-spreewald.jpg',
+        join(seedAssetsPath, 'routes', 'berlin-spreewald.png'),
+        'routes/seed/berlin-spreewald.png',
     );
 
     const southwestCoverKey = await uploadSeedImage(
-        join(seedAssetsPath, 'routes', 'heidelberg-baden-baden.jpg'),
-        'routes/seed/heidelberg-baden-baden.jpg',
+        join(seedAssetsPath, 'routes', 'heidelberg-baden-baden.png'),
+        'routes/seed/heidelberg-baden-baden.png',
     );
 
     const duesseldorfMaastrichtAachenCoverKey = await uploadSeedImage(
