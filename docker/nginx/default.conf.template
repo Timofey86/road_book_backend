@@ -2,8 +2,6 @@ server {
     listen 80;
     server_name ${API_DOMAIN};
 
-    client_max_body_size 6M;
-
     location /.well-known/acme-challenge/ {
         root /var/www/certbot;
     }
@@ -16,6 +14,8 @@ server {
 server {
     listen 443 ssl;
     server_name ${API_DOMAIN};
+
+    client_max_body_size 6M;
 
     ssl_certificate /etc/letsencrypt/live/${API_DOMAIN}/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/${API_DOMAIN}/privkey.pem;
